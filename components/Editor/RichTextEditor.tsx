@@ -78,7 +78,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("bold") ? "btn-primary" : "btn-ghost"
+              editor.isActive("bold") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Bold"
           >
@@ -106,7 +106,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("italic") ? "btn-primary" : "btn-ghost"
+              editor.isActive("italic") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Italic"
           >
@@ -146,7 +146,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("strike") ? "btn-primary" : "btn-ghost"
+              editor.isActive("strike") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Strikethrough"
           >
@@ -176,7 +176,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("codeBlock") ? "btn-primary" : "btn-ghost"
+              editor.isActive("codeBlock") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Code Block"
           >
@@ -204,7 +204,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().setParagraph().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("paragraph") ? "btn-primary" : "btn-ghost"
+              editor.isActive("paragraph") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Paragraph"
           >
@@ -229,7 +229,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             }
             className={`btn btn-sm text-base-content ${
               editor.isActive("heading", { level: 1 })
-                ? "btn-primary"
+                ? "btn-secondary"
                 : "btn-ghost"
             }`}
             title="Heading 1"
@@ -255,7 +255,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             }
             className={`btn btn-sm text-base-content ${
               editor.isActive("heading", { level: 2 })
-                ? "btn-primary"
+                ? "btn-secondary"
                 : "btn-ghost"
             }`}
             title="Heading 2"
@@ -278,7 +278,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("bulletList") ? "btn-primary" : "btn-ghost"
+              editor.isActive("bulletList") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Bullet List"
           >
@@ -303,7 +303,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <button
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={`btn btn-sm text-base-content ${
-              editor.isActive("orderedList") ? "btn-primary" : "btn-ghost"
+              editor.isActive("orderedList") ? "btn-secondary" : "btn-ghost"
             }`}
             title="Ordered List"
           >
