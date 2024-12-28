@@ -1,5 +1,7 @@
 import { ArrowRight, BookText, Globe, Users2 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import styles from "./Welcome.module.css";
 
 const features = [
   {
@@ -25,13 +27,13 @@ export default function Welcome() {
     <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto">
       <div className="max-w-3xl w-full text-center space-y-6">
         <h1 className="text-4xl font-bold text-base-content">
-          Welcome to <span className="font-mono text-primary">Noted.</span>
+          Welcome to{" "}
+          <span className={cn("text-primary", styles.animatedText)}>
+            Noted.
+          </span>
         </h1>
-        <p className="text-lg text-base-content">
-          Sign in to start creating and organizing your notes
-        </p>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
+        <div className="grid md:grid-cols-3 gap-6 mt-14">
           {features.map((feature, index) => (
             <div
               key={index}
@@ -40,10 +42,10 @@ export default function Welcome() {
               <div className="text-primary mb-3 flex justify-center">
                 {feature.icon}
               </div>
-              <h3 className="text-base font-semibold text-base-content mb-2">{feature.title}</h3>
-              <p className="text-sm text-base-content">
-                {feature.description}
-              </p>
+              <h3 className="text-base font-semibold text-base-content mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-base-content">{feature.description}</p>
             </div>
           ))}
         </div>

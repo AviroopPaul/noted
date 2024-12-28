@@ -3,6 +3,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/app/ThemeContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingSpinner from "../UI/LoadingSpinner";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -118,10 +119,17 @@ export default function SignInForm() {
       </div>
       <button
         type="submit"
-        className={`btn btn-primary w-full ${isLoading ? "loading" : ""}`}
+        className="btn btn-primary w-full"
         disabled={isLoading}
       >
-        {isLoading ? "Signing in..." : "Sign In"}
+        {isLoading ? (
+          <span className="flex items-center justify-center gap-2">
+            <LoadingSpinner size="small" />
+            Signing in...
+          </span>
+        ) : (
+          "Sign In"
+        )}
       </button>
     </form>
   );

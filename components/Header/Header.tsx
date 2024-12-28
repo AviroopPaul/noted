@@ -55,7 +55,7 @@ export default function Header() {
   return (
     <div className="navbar bg-base-200 border-b border-base-300 px-4">
       <div className="flex-1">
-        <span className="font-mono text-4xl font-semibold text-base-content">
+        <span className="font-mono text-4xl font-semibold text-primary">
           Noted.
         </span>
       </div>

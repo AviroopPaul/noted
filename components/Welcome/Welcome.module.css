@@ -1,0 +1,41 @@
+@keyframes fontChange {
+  0% {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+  }
+  16.67% {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+  }
+  33.33% {
+    font-family: "Roboto Slab", serif;
+    font-weight: 700;
+  }
+  50% {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+  }
+  66.67% {
+    font-family: "Fira Code", monospace;
+    font-weight: 700;
+  }
+  83.33% {
+    font-family: "Source Code Pro", monospace;
+    font-weight: 700;
+  }
+  100% {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+  }
+}
+
+.animatedText {
+  animation: fontChange 8s infinite;
+  display: inline-block;
+}
+
+/* Add a subtle transform effect during transition */
+.animatedText:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
