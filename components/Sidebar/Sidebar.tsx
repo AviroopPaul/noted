@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { createPage, selectPage, togglePageExpand } from "@/store/PagesSlice";
-import { useTheme } from "@/app/ThemeContext";
 import PageItem from "./PageItem";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -19,6 +18,7 @@ export default function Sidebar() {
       createPage({
         title: "Untitled",
         content: "",
+        isExpanded: false,
       })
     );
   };
@@ -62,15 +62,19 @@ export default function Sidebar() {
       </div>
       <div className="overflow-y-auto flex-1">
         {pages.map((page) => (
-          <PageItem
+          <div
             key={page._id}
-            page={page}
-            level={0}
-            selectedPageId={selectedPageId}
-            onSelect={(id) => handleSelectPage(id)}
-            onToggle={(id) => dispatch(togglePageExpand(id))}
-            isCollapsed={isCollapsed}
-          />
+            className="border-b border-base-300 last:border-b-0"
+          >
+            <PageItem
+              page={page}
+              level={0}
+              selectedPageId={selectedPageId}
+              onSelect={(id) => handleSelectPage(id)}
+              onToggle={(id) => dispatch(togglePageExpand(id))}
+              isCollapsed={isCollapsed}
+            />
+          </div>
         ))}
       </div>
     </div>

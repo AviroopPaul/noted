@@ -15,7 +15,6 @@ const THEMES = [
   { id: "light", icon: <Sun size={16} />, label: "Light" },
   { id: "dark", icon: <Moon size={16} />, label: "Dark" },
   { id: "cupcake", icon: <Palette size={16} />, label: "Cupcake" },
-  { id: "bumblebee", icon: <Palette size={16} />, label: "Bumblebee" },
   { id: "emerald", icon: <Palette size={16} />, label: "Emerald" },
   { id: "corporate", icon: <Palette size={16} />, label: "Corporate" },
   { id: "synthwave", icon: <Palette size={16} />, label: "Synthwave" },
