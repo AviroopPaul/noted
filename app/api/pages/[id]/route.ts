@@ -18,9 +18,15 @@ export async function PUT(
     const data = await request.json();
     await connectDB();
 
+    // Make sure we're only updating the fields that were sent
+    const updateData = {
+      ...data,
+      updatedAt: new Date(),
+    };
+
     const page = await Page.findOneAndUpdate(
       { _id: params.id, userId: session.user.id },
-      { ...data, updatedAt: new Date() },
+      { $set: updateData },
       { new: true }
     );
 
@@ -30,6 +36,7 @@ export async function PUT(
 
     return NextResponse.json(page);
   } catch (error) {
+    console.error("Update error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

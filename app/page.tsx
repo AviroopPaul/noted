@@ -55,7 +55,13 @@ export default function Home() {
 
   const handleUpdatePage = () => {
     if (selectedPageId) {
-      dispatch(updatePage({ id: selectedPageId, title, content }));
+      dispatch(
+        updatePage({
+          id: selectedPageId,
+          title,
+          content,
+        })
+      );
     }
   };
 

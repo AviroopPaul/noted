@@ -95,11 +95,12 @@ export const pagesSlice = createSlice({
         state.selectedPageId = action.payload._id;
       })
       .addCase(updatePage.fulfilled, (state, action) => {
-        const index = state.pages.findIndex(
-          (p) => p._id === action.payload._id
-        );
+        const index = state.pages.findIndex((p) => p._id === action.payload._id);
         if (index !== -1) {
-          state.pages[index] = action.payload;
+          state.pages[index] = {
+            ...state.pages[index],
+            ...action.payload,
+          };
         }
       })
       .addCase(deletePage.fulfilled, (state, action) => {
