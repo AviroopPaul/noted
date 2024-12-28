@@ -1,10 +1,10 @@
-import { Github, Twitter, Linkedin } from "lucide-react";
+import { Github, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="footer p-4 bg-base-200 text-base-content flex flex-col gap-2">
-      <div className="flex justify-between w-full items-center">
-        <div className="text-sm opacity-70">
+    <footer className="footer p-4 bg-base-200 text-base-content">
+      <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4">
+        <div className="text-sm opacity-70 text-center sm:text-left">
           © {new Date().getFullYear()} Noted.
         </div>
         <div className="flex gap-4">
@@ -25,8 +25,16 @@ const Footer = () => {
             <Linkedin size={20} />
           </a>
         </div>
-        <div className="text-sm opacity-70">
-          All rights reserved to <a className="text-primary" href="https://linkedin.com/in/avirooppaul" target="_blank" rel="noopener noreferrer">Aviroop.</a>
+        <div className="text-sm opacity-70 text-center sm:text-left">
+          All rights reserved to{" "}
+          <a
+            className="text-primary"
+            href="https://linkedin.com/in/avirooppaul"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Aviroop.
+          </a>
         </div>
       </div>
     </footer>

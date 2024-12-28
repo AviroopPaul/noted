@@ -380,12 +380,6 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
-    }
-  }, [content, editor]);
-
   return (
     <div className="flex flex-col">
       <MenuBar editor={editor} />
