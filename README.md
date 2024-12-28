@@ -9,19 +9,20 @@ A modern, clean note-taking application built with Next.js, featuring customizab
 
 ### Home Page
 
-[Screenshot of the main notes interface]
+![image](https://github.com/user-attachments/assets/335b6a00-a20c-4f8f-bcbe-b1418c3c8396)
 
-### Dark/Light Theme
+### Themes
 
-[Screenshots showing theme variations]
+![image](https://github.com/user-attachments/assets/21b9eea9-5c34-4b1a-9c0c-34f72f771006)
+![image](https://github.com/user-attachments/assets/461e417c-599c-45dd-9411-04fd896d1cb2)
+![image](https://github.com/user-attachments/assets/bff553b6-f50d-47c2-b226-587abec77bad)
+![image](https://github.com/user-attachments/assets/96e0afa7-4139-4d9f-a143-3d4c4e42d36d)
 
-### Authentication
 
-[Login/Signup interface screenshots]
 
-### Note Editor
+### Interface
 
-[Screenshot of the note editing interface]
+![image](https://github.com/user-attachments/assets/a230c0e8-970e-4af6-ba58-dd93c59dfa7f)
 
 </details>
 
