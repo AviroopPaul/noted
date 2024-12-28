@@ -102,6 +102,9 @@ export const pagesSlice = createSlice({
           state.pages[index] = {
             ...state.pages[index],
             ...action.payload,
+            content: action.payload.content,
+            title: action.payload.title,
+            _id: action.payload._id,
           };
         }
       })

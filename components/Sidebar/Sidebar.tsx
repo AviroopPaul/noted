@@ -4,10 +4,12 @@ import { RootState } from "@/store/store";
 import { createPage, selectPage, togglePageExpand } from "@/store/PagesSlice";
 import PageItem from "./PageItem";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import LoadingSpinner from "../UI/LoadingSpinner";
 
 export default function Sidebar() {
   const dispatch = useDispatch();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const pages = useSelector((state: RootState) => state.pages.pages);
   const selectedPageId = useSelector(
     (state: RootState) => state.pages.selectedPageId
@@ -23,8 +25,20 @@ export default function Sidebar() {
     );
   };
 
-  const handleSelectPage = (pageId: string) => {
+  const handleSelectPage = async (pageId: string) => {
+    if (pageId === selectedPageId) return; // Don't reload if already selected
+
+    setIsLoading(true);
+
+    // Clear current selection
+    dispatch(selectPage(null));
+
+    // Wait for state to clear
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Select new page
     dispatch(selectPage(pageId));
+    setIsLoading(false);
   };
 
   return (
@@ -33,6 +47,11 @@ export default function Sidebar() {
         isCollapsed ? "w-12" : "w-64"
       }`}
     >
+      {isLoading && (
+        <div className="absolute inset-0 bg-base-200 bg-opacity-50 flex items-center justify-center z-50">
+          <LoadingSpinner />
+        </div>
+      )}
       <div className="p-2 border-b border-base-300 flex justify-between items-center">
         {!isCollapsed && (
           <span className="text-base-content font-medium px-2">Pages</span>

@@ -38,28 +38,52 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
 
   useEffect(() => {
+    // Clear content when switching pages
+    setIsPageLoading(true);
+    setTitle("");
+    setContent("");
+
     if (selectedPage) {
-      setTitle(selectedPage.title || "");
-      setContent(selectedPage.content || "");
+      // Small delay to ensure state is cleared before setting new content
+      const timer = setTimeout(() => {
+        setTitle(selectedPage.title || "");
+        setContent(selectedPage.content || "");
+        setIsPageLoading(false);
+      }, 50);
+
+      return () => clearTimeout(timer);
     } else {
-      setTitle("");
-      setContent("");
+      setIsPageLoading(false);
     }
-  }, [selectedPage]);
+  }, [selectedPage?._id]);
 
   useEffect(() => {
     dispatch(fetchPages());
   }, [dispatch]);
 
+  useEffect(() => {
+    // Cleanup function to reset state when component unmounts
+    // or when selectedPageId changes
+    return () => {
+      setTitle("");
+      setContent("");
+      setIsPageLoading(false);
+    };
+  }, [selectedPageId]);
+
   const handleUpdatePage = () => {
-    if (selectedPageId) {
+    if (selectedPageId && selectedPage) {
       dispatch(
         updatePage({
           id: selectedPageId,
           title,
           content,
+          icon: selectedPage.icon,
+          cover: selectedPage.cover,
+          isExpanded: selectedPage.isExpanded,
         })
       );
     }
@@ -220,8 +244,6 @@ export default function Home() {
                               ? "dark"
                               : "light"
                           }
-                          as
-                          Theme
                         />
                       </div>
                     )}
@@ -245,11 +267,16 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 bg-base-100">
-                <RichTextEditor
-                  content={content}
-                  onChange={setContent}
-                  onBlur={handleUpdatePage}
-                />
+                {!isPageLoading ? (
+                  <RichTextEditor
+                    key={selectedPage?._id}
+                    content={content}
+                    onChange={setContent}
+                    onBlur={handleUpdatePage}
+                  />
+                ) : (
+                  <div className="animate-pulse w-full h-[200px] bg-base-200"></div>
+                )}
               </div>
             </>
           ) : (
