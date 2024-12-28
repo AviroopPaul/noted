@@ -67,7 +67,14 @@ bun dev
 - [Next.js](https://nextjs.org/) - React framework for production
 - [TypeScript](https://www.typescriptlang.org/) - For type-safe code
 - [Tailwind CSS](https://tailwindcss.com/) - For styling and theming
-- [Geist Font](https://vercel.com/font) - Clean, modern typography
+- [DaisyUI](https://daisyui.com/) - Tailwind CSS component library
+- [Redux Toolkit](https://redux-toolkit.js.org/) - State management
+- [TipTap](https://tiptap.dev/) - Rich text editor with extensions
+- [@tailwindcss/typography](https://tailwindcss.com/docs/typography-plugin) - Beautiful typographic defaults
+- [NextAuth.js](https://next-auth.js.org/) - Authentication for Next.js
+- [MongoDB](https://www.mongodb.com/) - Database
+- [Cloudinary](https://cloudinary.com/) - Media management
+- [Lucide React](https://lucide.dev/) - Beautiful icons
 
 ## 📝 Project Structure
 
