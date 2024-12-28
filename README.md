@@ -18,6 +18,8 @@ A modern, clean note-taking application built with Next.js, featuring customizab
 ![image](https://github.com/user-attachments/assets/bff553b6-f50d-47c2-b226-587abec77bad)
 ![image](https://github.com/user-attachments/assets/96e0afa7-4139-4d9f-a143-3d4c4e42d36d)
 
+and many more!
+
 
 
 ### Interface
