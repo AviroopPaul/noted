@@ -1,4 +1,4 @@
-# Notely
+# Noted
 
 A modern, clean note-taking application built with Next.js, featuring customizable themes and an intuitive interface.
 
