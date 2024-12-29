@@ -5,9 +5,12 @@ import {
   ChevronRight,
   Search,
   Settings,
+  Clock,
 } from "lucide-react";
 import { THEMES } from "@/lib/constants/themes";
 import { useTheme } from "@/app/ThemeContext";
+import { useDateTimeSettings } from "@/app/DateTimeContext";
+import { DateTimeSettings } from "./DateTimeSettings";
 
 interface ThemeOption {
   id: string;
@@ -29,25 +32,33 @@ export function UserDropdown({ username }: { username: string }) {
   const [darkExpanded, setDarkExpanded] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const [isDateTimeSettingsOpen, setIsDateTimeSettingsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { updateSettings } = useDateTimeSettings();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // Don't close if clicking inside the theme dropdown
-      const themeDropdownElement = document.querySelector(
-        ".menu.shadow.bg-base-200"
+      // Get both dropdown elements
+      const dateTimeSettingsElement = document.querySelector(
+        '[data-datetime-settings]'
       );
-      if (themeDropdownElement?.contains(event.target as Node)) {
+      const themeDropdownElement = document.querySelector(
+        '[data-theme-dropdown]'
+      );
+
+      // Don't close if clicking inside any of the dropdowns
+      if (
+        dateTimeSettingsElement?.contains(event.target as Node) ||
+        themeDropdownElement?.contains(event.target as Node) ||
+        dropdownRef.current?.contains(event.target as Node)
+      ) {
         return;
       }
 
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-        setIsThemeDropdownOpen(false);
-      }
+      // Close all dropdowns
+      setIsDropdownOpen(false);
+      setIsThemeDropdownOpen(false);
+      setIsDateTimeSettingsOpen(false);
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -77,6 +88,16 @@ export function UserDropdown({ username }: { username: string }) {
     (t) => t.id === theme
   )?.icon;
 
+  const handleThemeDropdownClick = () => {
+    setIsThemeDropdownOpen(!isThemeDropdownOpen);
+    setIsDateTimeSettingsOpen(false);
+  };
+
+  const handleDateTimeSettingsClick = () => {
+    setIsDateTimeSettingsOpen(!isDateTimeSettingsOpen);
+    setIsThemeDropdownOpen(false);
+  };
+
   return (
     <div className="dropdown relative" ref={dropdownRef}>
       <label
@@ -98,7 +119,7 @@ export function UserDropdown({ username }: { username: string }) {
       >
         <li>
           <button
-            onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+            onClick={handleThemeDropdownClick}
             className="hover:bg-base-300 w-full flex items-center justify-between px-3"
           >
             <div className="flex items-center gap-2">
@@ -108,11 +129,26 @@ export function UserDropdown({ username }: { username: string }) {
             <ChevronRight size={16} />
           </button>
         </li>
+        <li>
+          <button
+            onClick={handleDateTimeSettingsClick}
+            className="hover:bg-base-300 w-full flex items-center justify-between px-3"
+          >
+            <div className="flex items-center gap-2">
+              <Clock size={16} />
+              <span>Date & Time Settings</span>
+            </div>
+            <ChevronRight size={16} />
+          </button>
+        </li>
       </ul>
 
       {/* Theme Selection Dropdown */}
       {isThemeDropdownOpen && (
-        <ul className="menu shadow bg-base-200 rounded-box w-64 absolute left-[calc(100%+0.5rem)] top-0 z-[9999]">
+        <ul 
+          data-theme-dropdown
+          className="menu shadow bg-base-200 rounded-box w-64 absolute left-[calc(100%+2.5rem)] top-0 z-[9999]"
+        >
           <div className="sticky top-0 bg-base-200 p-2 z-10">
             <div className="form-control">
               <div className="relative">
@@ -205,6 +241,9 @@ export function UserDropdown({ username }: { username: string }) {
           </div>
         </ul>
       )}
+
+      {/* Date Time Settings */}
+      <DateTimeSettings isOpen={isDateTimeSettingsOpen} />
     </div>
   );
 }

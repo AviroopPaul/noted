@@ -48,3 +48,45 @@ input[type="number"]::-webkit-outer-spin-button {
 .font-handwriting {
   font-family: "Architects Daughter", cursive;
 }
+
+/* Calendar overrides */
+.react-calendar {
+  @apply !bg-transparent text-base-content;
+  border: none !important;
+}
+
+.react-calendar__navigation,
+.react-calendar__viewContainer,
+.react-calendar__navigation button,
+.react-calendar__month-view,
+.react-calendar__month-view > div,
+.react-calendar__month-view__days,
+.react-calendar__month-view__days > div,
+.react-calendar__month-view__weekdays,
+.react-calendar__month-view__weekdays__weekday {
+  @apply !bg-transparent;
+}
+
+/* Interactive states */
+.react-calendar__tile--active {
+  @apply bg-primary text-primary-content !important;
+}
+
+.react-calendar__tile--now {
+  @apply bg-secondary text-secondary-content !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  @apply bg-base-300 text-base-content;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  @apply bg-base-300;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  @apply bg-primary text-primary-content;
+}
