@@ -14,6 +14,15 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     image: String,
+    defaultTheme: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "dark",
+    },
+    displayName: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -28,4 +37,14 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+// First check if the model exists
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+// Now we can safely sync indexes
+try {
+  User.syncIndexes();
+} catch (error) {
+  console.error("Error syncing indexes:", error);
+}
+
+export default User;

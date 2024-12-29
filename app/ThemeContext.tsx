@@ -1,48 +1,76 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-
-export type Theme =
-  | "light"
-  | "dark"
-  | "cupcake"
-  | "bumblebee"
-  | "emerald"
-  | "corporate"
-  | "synthwave"
-  | "retro"
-  | "cyberpunk"
-  | "valentine"
-  | "halloween";
+import { useSession } from "next-auth/react";
+import { Theme as ThemeType } from "@/lib/constants/themes";
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  theme: ThemeType;
+  setTheme: (theme: ThemeType) => void;
+  updateUserDefaultTheme: (theme: ThemeType) => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<ThemeType>("light");
+  const { data: session } = useSession();
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    } else {
-      document.documentElement.setAttribute("data-theme", theme);
-    }
-  }, []);
+    const fetchUserTheme = async () => {
+      try {
+        const response = await fetch("/api/user/settings");
+        const data = await response.json();
+        console.log("Fetched user theme:", data);
+        if (data.defaultTheme) {
+          handleThemeChange(data.defaultTheme);
+        }
+      } catch (error) {
+        console.error("Error fetching user theme:", error);
+      }
+    };
 
-  const handleThemeChange = (newTheme: Theme) => {
+    if (session?.user) {
+      fetchUserTheme();
+    } else {
+      const savedTheme = localStorage.getItem("theme") as ThemeType;
+      if (savedTheme) {
+        handleThemeChange(savedTheme);
+      }
+    }
+  }, [session]);
+
+  const handleThemeChange = (newTheme: ThemeType) => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
+  const updateUserDefaultTheme = async (newTheme: ThemeType) => {
+    try {
+      const response = await fetch("/api/user/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ defaultTheme: newTheme }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update default theme");
+      }
+
+      handleThemeChange(newTheme);
+    } catch (error) {
+      console.error("Error updating default theme:", error);
+      throw error;
+    }
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
+    <ThemeContext.Provider
+      value={{ theme, setTheme: handleThemeChange, updateUserDefaultTheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );

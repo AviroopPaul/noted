@@ -1,7 +1,8 @@
 import React from "react";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { ThemeDropdown } from "./ThemeDropdown";
+import { UserDropdown } from "./UserDropdown";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -14,13 +15,12 @@ export default function Header() {
         </span>
       </div>
 
-      {/* Center section - Username */}
+      {/* Center section - Username with dropdown */}
       {session && (
-        <div className="flex-none">
-          <span className="text-base-content flex items-center gap-2">
-            <User size={16} />
-            {session.user?.name || session.user?.email}
-          </span>
+        <div className="flex-none text-base-content">
+          <UserDropdown
+            username={session.user?.name || session.user?.email || ""}
+          />
         </div>
       )}
 
