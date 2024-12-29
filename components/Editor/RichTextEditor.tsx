@@ -14,6 +14,11 @@ import Image from "@tiptap/extension-image";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import LoadingSpinner from "../UI/LoadingSpinner";
+import TextAlign from "@tiptap/extension-text-align";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from "@tiptap/extension-font-family";
+import Underline from "@tiptap/extension-underline";
+import { Color } from "@tiptap/extension-color";
 
 const lowlight = createLowlight(all);
 
@@ -420,6 +425,186 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
               />
             </svg>
           </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={`btn btn-sm text-base-content ${
+              editor.isActive("underline") ? "btn-primary" : "btn-ghost"
+            }`}
+            title="Underline"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <line
+                x1="4"
+                y1="21"
+                x2="20"
+                y2="21"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          <select
+            onChange={(e) => {
+              const family = e.target.value;
+              if (family === "default") {
+                editor.chain().focus().clearNodes().run();
+              } else {
+                editor.chain().focus().setFontFamily(family).run();
+              }
+            }}
+            className="select select-sm select-ghost"
+            value={editor.getAttributes("textStyle").fontFamily || "default"}
+          >
+            <option value="default">Font</option>
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Georgia">Georgia</option>
+          </select>
+
+          <div className="btn-group">
+            <button
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+              className={`btn btn-sm text-base-content ${
+                editor.isActive({ textAlign: "left" })
+                  ? "btn-primary"
+                  : "btn-ghost"
+              }`}
+              title="Align Left"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <line
+                  x1="3"
+                  y1="6"
+                  x2="21"
+                  y2="6"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="3"
+                  y1="12"
+                  x2="15"
+                  y2="12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="3"
+                  y1="18"
+                  x2="18"
+                  y2="18"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() =>
+                editor.chain().focus().setTextAlign("center").run()
+              }
+              className={`btn btn-sm text-base-content ${
+                editor.isActive({ textAlign: "center" })
+                  ? "btn-primary"
+                  : "btn-ghost"
+              }`}
+              title="Align Center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <line
+                  x1="3"
+                  y1="6"
+                  x2="21"
+                  y2="6"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="12"
+                  x2="18"
+                  y2="12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="4"
+                  y1="18"
+                  x2="20"
+                  y2="18"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+              className={`btn btn-sm text-base-content ${
+                editor.isActive({ textAlign: "right" })
+                  ? "btn-primary"
+                  : "btn-ghost"
+              }`}
+              title="Align Right"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <line
+                  x1="3"
+                  y1="6"
+                  x2="21"
+                  y2="6"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="9"
+                  y1="12"
+                  x2="21"
+                  y2="12"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="18"
+                  x2="21"
+                  y2="18"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -474,6 +659,19 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
       TaskItem.configure({
         nested: true,
       }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right", "justify"],
+      }),
+      TextStyle.configure({
+        types: ["textStyle"],
+      }),
+      Color,
+      FontFamily.configure({
+        types: ["textStyle"],
+        defaultFamily: "Arial",
+      }),
+      Underline,
     ],
     content,
     editorProps: {
@@ -764,6 +962,39 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
           .image-wrapper {
             position: relative;
             display: inline-block;
+          }
+
+          /* Add these to your existing styles */
+          [data-text-align="center"] {
+            text-align: center;
+          }
+
+          [data-text-align="right"] {
+            text-align: right;
+          }
+
+          [data-text-align="justify"] {
+            text-align: justify;
+          }
+
+          .ProseMirror [style*="font-family"] {
+            font-family: inherit;
+          }
+
+          .ProseMirror [style*="font-family: Arial"] {
+            font-family: Arial, sans-serif;
+          }
+
+          .ProseMirror [style*="font-family: Times New Roman"] {
+            font-family: "Times New Roman", serif;
+          }
+
+          .ProseMirror [style*="font-family: Courier New"] {
+            font-family: "Courier New", monospace;
+          }
+
+          .ProseMirror [style*="font-family: Georgia"] {
+            font-family: Georgia, serif;
           }
         `}</style>
         <EditorContent editor={editor} className="text-base-content" />
