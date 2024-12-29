@@ -7,13 +7,14 @@ import { updatePage, deletePage, fetchPages } from "@/store/PagesSlice";
 import { useTheme } from "./ThemeContext";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Header from "@/components/Header/Header";
-import { Trash2, ImagePlus } from "lucide-react";
+import { Trash2, ImagePlus, Maximize2, Minimize2 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import Welcome from "@/components/Welcome/Welcome";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { AppDispatch } from "@/store/store";
 import Footer from "@/components/Footer/Footer";
+import CoverImageModal from "@/components/CoverImageModal/CoverImageModal";
 
 const RichTextEditor = dynamic(
   () => import("@/components/Editor/RichTextEditor"),
@@ -39,6 +40,8 @@ export default function Home() {
   const [content, setContent] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [showCoverModal, setShowCoverModal] = useState(false);
+  const [isExpandedCover, setIsExpandedCover] = useState(false);
 
   useEffect(() => {
     // Clear content when switching pages
@@ -167,47 +170,69 @@ export default function Home() {
             <>
               <div className="relative">
                 {selectedPage.cover ? (
-                  <div className="w-full h-48 relative group">
-                    <img
-                      src={selectedPage.cover}
-                      alt="Cover"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all">
-                      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all flex gap-2">
-                        <label className="btn btn-sm bg-base-100 text-base-content hover:bg-base-200">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCoverImage}
-                            className="hidden"
-                          />
-                          Edit cover
-                        </label>
-                        <button
-                          className="btn btn-sm bg-base-100 text-base-content hover:bg-base-200"
-                          onClick={handleRemoveCover}
-                        >
-                          Remove cover
-                        </button>
+                  <div className="w-full relative group">
+                    <div
+                      className={`w-full transition-all duration-300 ease-in-out cursor-pointer ${
+                        isExpandedCover ? "h-96" : "h-48"
+                      }`}
+                      onClick={() => setIsExpandedCover(!isExpandedCover)}
+                    >
+                      <img
+                        src={selectedPage.cover}
+                        alt="Cover"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all">
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
+                          <button
+                            className="btn btn-circle btn-sm bg-base-100 text-base-content hover:bg-base-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsExpandedCover(!isExpandedCover);
+                            }}
+                          >
+                            {isExpandedCover ? (
+                              <Minimize2 size={20} />
+                            ) : (
+                              <Maximize2 size={20} />
+                            )}
+                          </button>
+                        </div>
+                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all flex gap-2">
+                          <button
+                            className="btn btn-sm bg-base-100 text-base-content hover:bg-base-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowCoverModal(true);
+                            }}
+                          >
+                            Edit cover
+                          </button>
+                          <button
+                            className="btn btn-sm bg-base-100 text-base-content hover:bg-base-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveCover();
+                            }}
+                          >
+                            Remove cover
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="w-full h-48 flex items-center justify-center border-b border-dashed border-base-300 bg-base-200/50">
                     <div className="text-center">
-                      <label className="btn btn-ghost btn-sm gap-2 text-base-content">
+                      <button
+                        className="btn btn-ghost btn-sm gap-2 text-base-content"
+                        onClick={() => setShowCoverModal(true)}
+                      >
                         <ImagePlus size={20} />
                         <span className="text-base-content">
                           Add cover image
                         </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleCoverImage}
-                          className="hidden"
-                        />
-                      </label>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -287,6 +312,24 @@ export default function Home() {
         </div>
       </div>
       <Footer />
+      <CoverImageModal
+        isOpen={showCoverModal}
+        onClose={() => setShowCoverModal(false)}
+        onImageSelect={(imageUrl) => {
+          if (selectedPageId) {
+            dispatch(
+              updatePage({
+                id: selectedPageId,
+                title,
+                content,
+                cover: imageUrl,
+              })
+            );
+            setShowCoverModal(false);
+          }
+        }}
+        onFileUpload={handleCoverImage}
+      />
     </main>
   );
 }
