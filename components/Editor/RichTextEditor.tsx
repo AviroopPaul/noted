@@ -1,6 +1,11 @@
 "use client";
 
-import { useEditor, EditorContent, Editor } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  Editor,
+  NodeViewWrapper,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
@@ -421,7 +426,27 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
+const ImageComponent = ({
+  node,
+  selected,
+}: {
+  node: any;
+  selected: boolean;
+}) => {
+  return (
+    <NodeViewWrapper className="image-wrapper">
+      <img
+        src={node.attrs.src}
+        className={`editor-image ${selected ? "selected" : ""}`}
+        alt={node.attrs.alt || ""}
+      />
+    </NodeViewWrapper>
+  );
+};
+
 const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
+  const [isPasting, setIsPasting] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -431,7 +456,20 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
         lowlight,
         defaultLanguage: null,
       }),
-      Image,
+      Image.configure({
+        HTMLAttributes: {
+          class: "editor-image",
+        },
+        selectable: true,
+        draggable: true,
+        nodeView: () => ({
+          dom: document.createElement("div"),
+          contentDOM: document.createElement("div"),
+          update: (node: any) => {
+            return true;
+          },
+        }),
+      }),
       TaskList,
       TaskItem.configure({
         nested: true,
@@ -442,6 +480,43 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
       attributes: {
         class:
           "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none max-w-none text-base-content",
+      },
+      handlePaste: async (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItems = items.filter((item) =>
+          item.type.startsWith("image")
+        );
+
+        if (imageItems.length > 0) {
+          event.preventDefault();
+          setIsPasting(true);
+
+          try {
+            for (const item of imageItems) {
+              const file = item.getAsFile();
+              if (!file) continue;
+
+              const formData = new FormData();
+              formData.append("file", file);
+
+              const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+              });
+
+              const data = await response.json();
+              if (data.url) {
+                editor?.chain().focus().setImage({ src: data.url }).run();
+              }
+            }
+          } catch (error) {
+            console.error("Image upload failed:", error);
+          } finally {
+            setIsPasting(false);
+          }
+          return true;
+        }
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
@@ -470,9 +545,14 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col relative">
       <MenuBar editor={editor} />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto relative">
+        {isPasting && (
+          <div className="absolute inset-0 bg-base-100 bg-opacity-50 flex items-center justify-center z-50">
+            <LoadingSpinner size="large" />
+          </div>
+        )}
         <style jsx global>{`
           .ProseMirror {
             min-height: 100%;
@@ -598,11 +678,23 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
             font-weight: 700;
           }
 
-          img {
-            max-width: 100%;
+          .editor-image {
+            max-width: 30%;
             height: auto;
             margin: 1em 0;
             border-radius: 0.5em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+          }
+
+          .editor-image.ProseMirror-selectednode {
+            outline: 3px solid hsl(var(--p));
+            outline-offset: 2px;
+          }
+
+          .editor-image:hover {
+            outline: 2px solid hsl(var(--p) / 0.5);
+            outline-offset: 2px;
           }
 
           ul[data-type="taskList"] {
@@ -632,6 +724,46 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
             input[type="checkbox"] {
               cursor: pointer;
             }
+          }
+
+          .image-wrapper {
+            position: relative;
+            display: inline-block;
+          }
+
+          .editor-image {
+            max-width: 30%;
+            height: auto;
+            margin: 1em 0;
+            border-radius: 0.5em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+          }
+
+          .editor-image.selected {
+            outline: 3px solid hsl(var(--p));
+            outline-offset: 2px;
+          }
+
+          .editor-image:hover {
+            outline: 2px solid hsl(var(--p) / 0.5);
+            outline-offset: 2px;
+          }
+
+          /* Add this to ensure the image node is selectable */
+          .ProseMirror-selectednode .editor-image {
+            outline: 3px solid hsl(var(--p));
+            outline-offset: 2px;
+          }
+
+          /* Add these new styles */
+          .ProseMirror {
+            position: relative;
+          }
+
+          .image-wrapper {
+            position: relative;
+            display: inline-block;
           }
         `}</style>
         <EditorContent editor={editor} className="text-base-content" />
