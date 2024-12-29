@@ -50,19 +50,19 @@ export default function Sidebar() {
 
   const startResizing = useCallback((e: React.MouseEvent) => {
     isResizing.current = true;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', stopResizing);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", stopResizing);
   }, []);
 
   const stopResizing = useCallback(() => {
     isResizing.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', stopResizing);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", stopResizing);
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing.current) return;
-    
+
     const newWidth = e.clientX;
     if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
       setWidth(newWidth);
