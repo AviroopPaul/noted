@@ -34,9 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       fetchUserTheme();
     } else {
       const savedTheme = localStorage.getItem("theme") as ThemeType;
-      if (savedTheme) {
-        handleThemeChange(savedTheme);
-      }
+      handleThemeChange(savedTheme || "light"); // Use localStorage theme or default to light
     }
   }, [session]);
 

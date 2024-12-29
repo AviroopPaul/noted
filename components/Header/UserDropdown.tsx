@@ -1,5 +1,11 @@
-import React, { useState } from "react";
-import { ChevronDown, User, ChevronRight, Search } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ChevronDown,
+  User,
+  ChevronRight,
+  Search,
+  Settings,
+} from "lucide-react";
 import { THEMES } from "@/lib/constants/themes";
 import { useTheme } from "@/app/ThemeContext";
 
@@ -23,12 +29,36 @@ export function UserDropdown({ username }: { username: string }) {
   const [darkExpanded, setDarkExpanded] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Don't close if clicking inside the theme dropdown
+      const themeDropdownElement = document.querySelector(
+        ".menu.shadow.bg-base-200"
+      );
+      if (themeDropdownElement?.contains(event.target as Node)) {
+        return;
+      }
+
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+        setIsThemeDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleThemeSelect = async (themeId: string) => {
     try {
       await updateUserDefaultTheme(themeId);
-      setIsThemeDropdownOpen(false);
-      setIsDropdownOpen(false);
     } catch (error) {
       console.error("Failed to update theme:", error);
     }
@@ -48,7 +78,7 @@ export function UserDropdown({ username }: { username: string }) {
   )?.icon;
 
   return (
-    <div className="dropdown dropdown-end relative">
+    <div className="dropdown relative" ref={dropdownRef}>
       <label
         tabIndex={0}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -56,20 +86,20 @@ export function UserDropdown({ username }: { username: string }) {
       >
         <User size={16} />
         <span>{username}</span>
-        <ChevronDown size={16} />
+        <Settings size={16} className="text-base-content/70" />
       </label>
 
       {/* Main Dropdown Menu */}
       <ul
         tabIndex={0}
-        className={`dropdown-content z-[9999] menu p-2 shadow bg-base-200 rounded-box w-52 ${
+        className={`dropdown-content z-[9999] menu p-2 shadow bg-base-200 rounded-box w-64 absolute left-1/2 -translate-x-1/2 ${
           isDropdownOpen ? "block" : "hidden"
         }`}
       >
         <li>
           <button
             onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
-            className="hover:bg-base-300 w-full flex items-center justify-between"
+            className="hover:bg-base-300 w-full flex items-center justify-between px-3"
           >
             <div className="flex items-center gap-2">
               {currentThemeIcon}
@@ -82,7 +112,7 @@ export function UserDropdown({ username }: { username: string }) {
 
       {/* Theme Selection Dropdown */}
       {isThemeDropdownOpen && (
-        <ul className="menu shadow bg-base-200 rounded-box w-52 absolute left-[calc(100%+0.5rem)] top-0 z-[9999]">
+        <ul className="menu shadow bg-base-200 rounded-box w-64 absolute left-[calc(100%+0.5rem)] top-0 z-[9999]">
           <div className="sticky top-0 bg-base-200 p-2 z-10">
             <div className="form-control">
               <div className="relative">
