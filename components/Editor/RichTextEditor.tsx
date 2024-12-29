@@ -5,6 +5,10 @@ import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
 import { useEffect, useState } from "react";
+import Image from "@tiptap/extension-image";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import LoadingSpinner from "../UI/LoadingSpinner";
 
 const lowlight = createLowlight(all);
 
@@ -39,6 +43,7 @@ interface RichTextEditorProps {
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!editor) {
     return null;
@@ -331,6 +336,85 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
               </text>
             </svg>
           </button>
+          <button
+            onClick={async () => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/*";
+              input.onchange = async () => {
+                if (input.files?.length) {
+                  const file = input.files[0];
+                  const formData = new FormData();
+                  formData.append("file", file);
+
+                  try {
+                    setIsUploading(true);
+                    const response = await fetch("/api/upload", {
+                      method: "POST",
+                      body: formData,
+                    });
+
+                    const data = await response.json();
+                    if (data.url) {
+                      editor.chain().focus().setImage({ src: data.url }).run();
+                    }
+                  } catch (error) {
+                    console.error("Upload failed:", error);
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }
+              };
+              input.click();
+            }}
+            className="btn btn-sm text-base-content btn-ghost"
+            title="Insert Image"
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <LoadingSpinner size="small" />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleTaskList().run()}
+            className={`btn btn-sm text-base-content ${
+              editor.isActive("taskList") ? "btn-primary" : "btn-ghost"
+            }`}
+            title="Task List"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 14l2 2 4-4"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -346,6 +430,11 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
       CodeBlockLowlight.configure({
         lowlight,
         defaultLanguage: null,
+      }),
+      Image,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
       }),
     ],
     content,
@@ -507,6 +596,42 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
 
           .hljs-strong {
             font-weight: 700;
+          }
+
+          img {
+            max-width: 100%;
+            height: auto;
+            margin: 1em 0;
+            border-radius: 0.5em;
+          }
+
+          ul[data-type="taskList"] {
+            list-style: none;
+            padding: 0;
+
+            li {
+              display: flex;
+              align-items: flex-start;
+              margin: 0.5em 0;
+
+              > label {
+                margin-right: 0.5em;
+                user-select: none;
+              }
+
+              > div {
+                flex: 1;
+                margin-bottom: 0.5em;
+
+                > p {
+                  margin: 0;
+                }
+              }
+            }
+
+            input[type="checkbox"] {
+              cursor: pointer;
+            }
           }
         `}</style>
         <EditorContent editor={editor} className="text-base-content" />
