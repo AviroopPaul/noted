@@ -40,10 +40,10 @@ export function UserDropdown({ username }: { username: string }) {
     function handleClickOutside(event: MouseEvent) {
       // Get both dropdown elements
       const dateTimeSettingsElement = document.querySelector(
-        '[data-datetime-settings]'
+        "[data-datetime-settings]"
       );
       const themeDropdownElement = document.querySelector(
-        '[data-theme-dropdown]'
+        "[data-theme-dropdown]"
       );
 
       // Don't close if clicking inside any of the dropdowns
@@ -145,7 +145,7 @@ export function UserDropdown({ username }: { username: string }) {
 
       {/* Theme Selection Dropdown */}
       {isThemeDropdownOpen && (
-        <ul 
+        <ul
           data-theme-dropdown
           className="menu shadow bg-base-200 rounded-box w-64 absolute left-[calc(100%+2.5rem)] top-0 z-[9999]"
         >
