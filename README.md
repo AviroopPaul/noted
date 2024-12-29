@@ -20,8 +20,6 @@ A modern, clean note-taking application built with Next.js, featuring customizab
 
 and many more!
 
-
-
 ### Interface
 
 ![image](https://github.com/user-attachments/assets/a230c0e8-970e-4af6-ba58-dd93c59dfa7f)
@@ -31,6 +29,7 @@ and many more!
 ## ✨ Features
 
 - 📝 Clean and intuitive note-taking interface
+- 🎨 NotedAI - Intelligent AI assistant for enhanced note-taking
 - 🎨 Customizable themes (Light/Dark mode)
 - 🔒 Secure user authentication
 - 📱 Responsive design for all devices

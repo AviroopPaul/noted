@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@600&display=swap");
+
 .ProseMirror {
   min-height: 100%;
   padding: 1rem;
@@ -212,4 +214,45 @@ ul[data-type="taskList"] input[type="checkbox"] {
 
 .ProseMirror [style*="font-family: Georgia"] {
   font-family: Georgia, serif;
+}
+
+@keyframes sparkle {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.ai-button-gradient {
+  background: linear-gradient(
+    90deg,
+    theme(colors.primary),
+    theme(colors.secondary),
+    theme(colors.accent),
+    theme(colors.primary)
+  );
+  background-size: 300% 100%;
+  animation: sparkle 4s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Add this new class for the modal header */
+.modal-header-gradient {
+  background: linear-gradient(
+    90deg,
+    theme(colors.primary),
+    theme(colors.secondary),
+    theme(colors.accent),
+    theme(colors.primary)
+  );
+  background-size: 300% 100%;
+  animation: sparkle 4s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
 }
