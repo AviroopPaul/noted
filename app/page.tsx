@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { updatePage, deletePage, fetchPages } from "@/store/PagesSlice";
@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import { AppDispatch } from "@/store/store";
 import Footer from "@/components/Footer/Footer";
 import CoverImageModal from "@/components/CoverImageModal/CoverImageModal";
+import { debounce } from "lodash";
 
 const RichTextEditor = dynamic(
   () => import("@/components/Editor/RichTextEditor"),
@@ -77,8 +78,9 @@ export default function Home() {
     };
   }, [selectedPageId]);
 
-  const handleUpdatePage = () => {
+  const handleUpdatePage = useCallback(() => {
     if (selectedPageId && selectedPage) {
+      console.log("Saving page...", { title, content }); // Debug log
       dispatch(
         updatePage({
           id: selectedPageId,
@@ -90,7 +92,7 @@ export default function Home() {
         })
       );
     }
-  };
+  }, [selectedPageId, selectedPage, title, content, dispatch]);
 
   const handleDeletePage = () => {
     if (selectedPageId) {
@@ -296,7 +298,14 @@ export default function Home() {
                   <RichTextEditor
                     key={selectedPage?._id}
                     content={content}
-                    onChange={setContent}
+                    onChange={(newContent) => {
+                      console.log(
+                        "Content changed:",
+                        newContent.substring(0, 100)
+                      ); // Debug log
+                      setContent(newContent);
+                      handleUpdatePage(); // Save immediately on change
+                    }}
                     onBlur={handleUpdatePage}
                   />
                 ) : (

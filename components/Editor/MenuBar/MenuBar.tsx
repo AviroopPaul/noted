@@ -11,6 +11,7 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isFormatting, setIsFormatting] = useState(false);
 
   if (!editor) {
     return null;
@@ -45,6 +46,36 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
       }
     };
     input.click();
+  };
+
+  const handleAIFormat = async () => {
+    const content = editor.getHTML();
+    setIsFormatting(true);
+
+    try {
+      const response = await fetch("/api/ai/format", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      const data = await response.json();
+
+      if (data.response) {
+        editor.commands.setContent(data.response);
+
+        const newContent = editor.getHTML();
+        editor.options.onUpdate?.({ editor, transaction: editor.state.tr });
+
+        editor.commands.blur();
+      }
+    } catch (error) {
+      console.error("Format failed:", error);
+    } finally {
+      setIsFormatting(false);
+    }
   };
 
   return (
@@ -497,6 +528,39 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
             </button>
 
             <button
+              onClick={handleAIFormat}
+              disabled={isFormatting}
+              className="btn btn-sm btn-ghost flex items-center gap-1"
+              title="AI Format"
+            >
+              {isFormatting ? (
+                <LoadingSpinner size="small" />
+              ) : (
+                <>
+                  <span
+                    style={{
+                      background: `linear-gradient(
+                        45deg,
+                        oklch(var(--p)) 0%,
+                        oklch(var(--s)) 33%,
+                        oklch(var(--a)) 66%,
+                        oklch(var(--p)) 100%
+                      )`,
+                      backgroundSize: "300% auto",
+                      WebkitBackgroundClip: "text",
+                      backgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      animation: "gradient 3s linear infinite",
+                    }}
+                    className="font-bold text-lg"
+                  >
+                    AI-Format{" "}
+                  </span>
+                </>
+              )}
+            </button>
+
+            <button
               onClick={() => setIsAIModalOpen(true)}
               className="btn btn-sm btn-ghost flex items-center gap-1 group"
               title="AI Assistant"
@@ -521,22 +585,29 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
                 <span className="text-sm">✨</span> NotedAI{" "}
                 <span className="text-sm">✨</span>
               </span>
-
-              <style jsx>{`
-                @keyframes gradient {
-                  0% {
-                    background-position: 0% center;
-                  }
-                  100% {
-                    background-position: 300% center;
-                  }
-                }
-              `}</style>
             </button>
           </div>
         </div>
       </div>
       <AIModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />
+      <style jsx>{`
+        @keyframes gradient {
+          0% {
+            background-position: 0% center;
+          }
+          100% {
+            background-position: 300% center;
+          }
+        }
+        @keyframes format-gradient {
+          0% {
+            background-position: 0% center;
+          }
+          100% {
+            background-position: 200% center;
+          }
+        }
+      `}</style>
     </>
   );
 };

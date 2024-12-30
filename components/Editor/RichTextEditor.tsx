@@ -81,9 +81,17 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
       },
     },
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const newContent = editor.getHTML();
+      console.log(
+        "Editor content updated:",
+        newContent.substring(0, 100) + "..."
+      );
+      onChange(newContent);
     },
-    onBlur,
+    onBlur: () => {
+      console.log("Editor blur event triggered");
+      onBlur();
+    },
   });
 
   useEffect(() => {
