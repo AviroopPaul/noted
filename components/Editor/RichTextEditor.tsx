@@ -16,6 +16,29 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
   const [isPasting, setIsPasting] = useState(false);
+  const [codeToInsert, setCodeToInsert] = useState<{
+    text: string;
+    language: string;
+  } | null>(null);
+
+  const detectLanguage = (text: string) => {
+    // Common language patterns
+    const patterns = {
+      javascript: /(const|let|var|function|=>|import|export)/,
+      python: /(def|import|class|if __name__|print)/,
+      html: /(<\/?[a-z][\s\S]*>)/i,
+      css: /({[\s\S]*}|@media|@keyframes)/,
+      sql: /(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE)/i,
+    };
+
+    for (const [language, pattern] of Object.entries(patterns)) {
+      if (pattern.test(text)) {
+        return language;
+      }
+    }
+
+    return "plain"; // default to plain text
+  };
 
   const editor = useEditor({
     extensions: getExtensions(),
@@ -25,8 +48,36 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
         class:
           "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none max-w-none text-base-content",
       },
-      handlePaste: async (view, event) => {
-        // Paste handler code...
+      handlePaste: (view, event, slice) => {
+        // Check if we're pasting inside a code block
+        const isInCode = editor?.isActive("codeBlock");
+
+        if (event.clipboardData?.types.includes("text/plain")) {
+          const text = event.clipboardData.getData("text/plain");
+
+          // If we're already in a code block, just paste the text
+          if (isInCode) {
+            view.dispatch(view.state.tr.insertText(text));
+            return true;
+          }
+
+          // Try to detect if the content looks like code
+          const looksLikeCode =
+            /^(import|function|class|const|let|var|if|for|while|\{|\}|\/\/|\/\*|\*\/|#include|def|async|await)/.test(
+              text.trim()
+            );
+
+          if (looksLikeCode) {
+            const language = detectLanguage(text);
+            setCodeToInsert({ text, language });
+            return true;
+          }
+
+          // For regular text, let default paste behavior handle it
+          return false;
+        }
+
+        return false;
       },
     },
     onUpdate: ({ editor }) => {
@@ -65,6 +116,45 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
         )}
         <EditorContent editor={editor} className="text-base-content" />
       </div>
+      {codeToInsert && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-base-100 p-4 rounded-lg">
+            <p>This looks like code. How would you like to paste it?</p>
+            <select
+              value={codeToInsert.language}
+              onChange={(e) =>
+                setCodeToInsert({ ...codeToInsert, language: e.target.value })
+              }
+            >
+              <option value="plain">Plain text</option>
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              {/* Add more languages */}
+            </select>
+            <button
+              onClick={() => {
+                editor
+                  ?.chain()
+                  .focus()
+                  .setCodeBlock({ language: codeToInsert.language })
+                  .insertContent(codeToInsert.text)
+                  .run();
+                setCodeToInsert(null);
+              }}
+            >
+              Insert as Code
+            </button>
+            <button
+              onClick={() => {
+                editor?.chain().focus().insertContent(codeToInsert.text).run();
+                setCodeToInsert(null);
+              }}
+            >
+              Insert as Text
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
