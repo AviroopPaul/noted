@@ -115,7 +115,7 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="sticky top-0 z-50 bg-base-100">
+      <div className="sticky top-0 z-25 bg-base-100">
         <MenuBar editor={editor} />
       </div>
       <div className="flex-1 overflow-y-auto relative">
