@@ -10,6 +10,7 @@ import Underline from "@tiptap/extension-underline";
 import { Color } from "@tiptap/extension-color";
 import { createLowlight, all } from "lowlight";
 import { FontSize } from "./FontSize";
+import Highlight from "@tiptap/extension-highlight";
 
 const lowlight = createLowlight(all);
 
@@ -56,4 +57,7 @@ export const getExtensions = () => [
   }),
   Underline,
   FontSize,
+  Highlight.configure({
+    multicolor: false,
+  }),
 ];

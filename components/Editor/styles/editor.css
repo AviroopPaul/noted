@@ -216,7 +216,6 @@ ul[data-type="taskList"] input[type="checkbox"] {
   font-family: Georgia, serif;
 }
 
-
 /* Modal header styling */
 .modal-header-gradient {
   background: linear-gradient(
@@ -233,4 +232,15 @@ ul[data-type="taskList"] input[type="checkbox"] {
   -webkit-text-fill-color: transparent;
   animation: ai-glow 3s linear infinite;
   font-weight: 600;
+}
+
+.ProseMirror mark {
+  background-color: #fef08a;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.ProseMirror mark.selected {
+  background-color: #fde047;
 }

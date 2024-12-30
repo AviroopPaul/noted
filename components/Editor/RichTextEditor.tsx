@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import { useEffect, useState } from "react";
 import MenuBar from "./MenuBar/MenuBar";
 import LoadingSpinner from "../UI/LoadingSpinner";
@@ -113,12 +113,65 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
     return () => observer.disconnect();
   }, []);
 
+  if (!editor) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <div className="sticky top-0 z-25 bg-base-100">
         <MenuBar editor={editor} />
       </div>
       <div className="flex-1 overflow-y-auto relative">
+        {editor && (
+          <BubbleMenu
+            editor={editor}
+            tippyOptions={{ duration: 100 }}
+            className="bg-base-100 shadow-lg rounded-lg px-2 py-1 border border-base-300 flex gap-1 text-base-content"
+          >
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("bold") ? "bg-base-300" : ""
+              }`}
+            >
+              B
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("italic") ? "bg-base-300" : ""
+              }`}
+            >
+              <i>I</i>
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("underline") ? "bg-base-300" : ""
+              }`}
+            >
+              <u>U</u>
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("strike") ? "bg-base-300" : ""
+              }`}
+            >
+              <s>S</s>
+            </button>
+            <div className="w-px bg-base-300 mx-1" /> {/* Separator */}
+            <button
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("highlight") ? "bg-yellow-200 text-black" : ""
+              }`}
+            >
+              Highlight
+            </button>
+          </BubbleMenu>
+        )}
         {isPasting && (
           <div className="absolute inset-0 bg-base-100 bg-opacity-50 flex items-center justify-center z-50">
             <LoadingSpinner size="large" />

@@ -175,7 +175,7 @@ export default function Home() {
                   <div className="w-full relative group">
                     <div
                       className={`w-full transition-all duration-300 ease-in-out cursor-pointer ${
-                        isExpandedCover ? "h-96" : "h-48"
+                        isExpandedCover ? "h-96" : "h-56"
                       }`}
                       onClick={() => setIsExpandedCover(!isExpandedCover)}
                     >
