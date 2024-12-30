@@ -216,43 +216,21 @@ ul[data-type="taskList"] input[type="checkbox"] {
   font-family: Georgia, serif;
 }
 
-@keyframes sparkle {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
 
-.ai-button-gradient {
-  background: linear-gradient(
-    90deg,
-    theme(colors.primary),
-    theme(colors.secondary),
-    theme(colors.accent),
-    theme(colors.primary)
-  );
-  background-size: 300% 100%;
-  animation: sparkle 4s linear infinite;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Add this new class for the modal header */
+/* Modal header styling */
 .modal-header-gradient {
   background: linear-gradient(
-    90deg,
-    theme(colors.primary),
-    theme(colors.secondary),
-    theme(colors.accent),
-    theme(colors.primary)
+    120deg,
+    oklch(var(--p)) 0%,
+    oklch(var(--s)) 25%,
+    oklch(var(--in)) 50%,
+    oklch(var(--a)) 75%,
+    oklch(var(--p)) 100%
   );
-  background-size: 300% 100%;
-  animation: sparkle 4s linear infinite;
+  background-size: 400% auto;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: ai-glow 3s linear infinite;
   font-weight: 600;
 }

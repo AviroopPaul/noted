@@ -69,7 +69,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-base-100 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border border-primary/20 shadow-lg shadow-primary/20">
+      <div className="bg-base-100 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border border-primary/20 shadow-lg shadow-primary/20 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
         {/* Header */}
         <div className="p-4 border-b border-primary/20 flex justify-between items-center bg-base-200/50">
           <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
           </div>
           <button
             onClick={onClose}
-            className="btn btn-ghost btn-sm btn-circle"
+            className="btn btn-ghost btn-sm btn-circle text-base-content"
             aria-label="Close"
           >
             ×
@@ -95,7 +95,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
         </div>
 
         {/* Conversation History */}
-        <div className="flex-1 overflow-auto p-4 space-y-4">
+        <div className="flex-1 overflow-auto p-4 space-y-4 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
           {conversations.map((conv, index) => (
             <div key={index} className="space-y-2">
               {conv.prompt && (
@@ -103,7 +103,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                   <p className="font-medium text-sm text-base-content/70 mb-2">
                     You
                   </p>
-                  <p className="mt-1">{conv.prompt}</p>
+                  <p className="mt-1 text-base-content">{conv.prompt}</p>
                 </div>
               )}
               <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
@@ -120,7 +120,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                   {conv.prompt && (
                     <button
                       onClick={() => copyToClipboard(conv.response)}
-                      className="btn btn-ghost btn-xs"
+                      className="btn btn-ghost btn-xs text-base-content"
                       title="Copy response"
                     >
                       <svg
@@ -140,7 +140,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                     </button>
                   )}
                 </div>
-                <p className="mt-1 whitespace-pre-wrap">{conv.response}</p>
+                <p className="mt-1 whitespace-pre-wrap text-base-content">{conv.response}</p>
               </div>
             </div>
           ))}
@@ -157,7 +157,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ask anything..."
-              className="input input-bordered flex-1 bg-base-100 border-primary/20 focus:border-primary"
+              className="input input-bordered flex-1 bg-base-100 border-primary/20 text-base-content focus:border-primary"
               disabled={isLoading}
             />
             <button

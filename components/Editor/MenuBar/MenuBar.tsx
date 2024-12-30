@@ -137,34 +137,47 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
             >
               <span style={{ textDecoration: "line-through" }}>S</span>
             </button>
-
-            <button
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 1 }).run()
-              }
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("heading", { level: 1 })
-                  ? "btn-primary"
-                  : "btn-ghost"
-              }`}
-              title="Heading 1"
-            >
-              <span className="font-bold">H1</span>
-            </button>
-
-            <button
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 2 }).run()
-              }
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("heading", { level: 2 })
-                  ? "btn-primary"
-                  : "btn-ghost"
-              }`}
-              title="Heading 2"
-            >
-              <span className="font-bold">H2</span>
-            </button>
+            <div className="btn-group">
+              <button
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 1 }).run()
+                }
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("heading", { level: 1 })
+                    ? "btn-primary"
+                    : "btn-ghost"
+                }`}
+                title="Heading 1"
+              >
+                <span className="font-bold text-lg">H1</span>
+              </button>
+              <button
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 2 }).run()
+                }
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("heading", { level: 2 })
+                    ? "btn-primary"
+                    : "btn-ghost"
+                }`}
+                title="Heading 2"
+              >
+                <span className="font-bold text-md">H2</span>
+              </button>
+              <button
+                onClick={() =>
+                  editor.chain().focus().toggleHeading({ level: 3 }).run()
+                }
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("heading", { level: 3 })
+                    ? "btn-primary"
+                    : "btn-ghost"
+                }`}
+                title="Heading 3"
+              >
+                <span className="font-bold text-xs">H3</span>
+              </button>
+            </div>
 
             <div className="btn-group">
               <button
@@ -489,29 +502,36 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
               title="AI Assistant"
             >
               <span
-                className="ai-button-gradient font-semibold"
                 style={{
-                  fontFamily: "'Quicksand', sans-serif",
-                  fontSize: "1.1em",
-                  letterSpacing: "0.03em",
+                  background: `linear-gradient(
+                    45deg,
+                    oklch(var(--p)) 0%,
+                    oklch(var(--s)) 33%,
+                    oklch(var(--a)) 66%,
+                    oklch(var(--p)) 100%
+                  )`,
+                  backgroundSize: "300% auto",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  animation: "gradient 3s linear infinite",
                 }}
+                className="font-bold text-lg"
               >
-                NotedAI
+                <span className="text-sm">✨</span> NotedAI{" "}
+                <span className="text-sm">✨</span>
               </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 transition-transform group-hover:scale-110 text-amber-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-                />
-              </svg>
+
+              <style jsx>{`
+                @keyframes gradient {
+                  0% {
+                    background-position: 0% center;
+                  }
+                  100% {
+                    background-position: 300% center;
+                  }
+                }
+              `}</style>
             </button>
           </div>
         </div>
