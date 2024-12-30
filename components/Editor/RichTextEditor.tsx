@@ -114,9 +114,11 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col relative">
-      <MenuBar editor={editor} />
-      <div className="flex-1 overflow-auto relative">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      <div className="sticky top-0 z-50 bg-base-100">
+        <MenuBar editor={editor} />
+      </div>
+      <div className="flex-1 overflow-y-auto relative">
         {isPasting && (
           <div className="absolute inset-0 bg-base-100 bg-opacity-50 flex items-center justify-center z-50">
             <LoadingSpinner size="large" />

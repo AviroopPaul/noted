@@ -65,10 +65,7 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
 
       if (data.response) {
         editor.commands.setContent(data.response);
-
-        const newContent = editor.getHTML();
         editor.options.onUpdate?.({ editor, transaction: editor.state.tr });
-
         editor.commands.blur();
       }
     } catch (error) {
@@ -80,7 +77,7 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
 
   return (
     <>
-      <div className="relative">
+      <div className="relative bg-base-100 border-b border-base-300">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="absolute top-2 left-2 z-10 p-2 hover:bg-base-200 rounded-lg text-base-content"
