@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import Calendar from "react-calendar";
@@ -10,6 +10,21 @@ export const DateTime = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { settings } = useDateTimeSettings();
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Handle clicking outside calendar
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setIsCalendarOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Update time every second if showing seconds, otherwise every minute
   React.useEffect(() => {
@@ -54,7 +69,7 @@ export const DateTime = () => {
   };
 
   return (
-    <div className="relative text-base-content">
+    <div className="relative text-base-content" ref={calendarRef}>
       <button
         onClick={() => setIsCalendarOpen(!isCalendarOpen)}
         className="btn btn-ghost btn-sm gap-2 text-base-content flex items-center"

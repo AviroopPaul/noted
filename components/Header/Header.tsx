@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { ThemeDropdown } from "./ThemeDropdown";
 import { UserDropdown } from "./UserDropdown";
 import { DateTime } from "./DateTime";
+import { ThoughtOfTheDay } from "./ThoughtOfTheDay";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -27,6 +28,7 @@ export default function Header() {
 
       {/* Right section */}
       <div className="flex-1 flex justify-end items-center gap-4">
+        <ThoughtOfTheDay />
         <DateTime />
         <ThemeDropdown />
 
