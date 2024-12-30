@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { createPage, selectPage, togglePageExpand } from "@/store/PagesSlice";
 import PageItem from "./PageItem";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
 export default function Sidebar() {
@@ -21,6 +21,10 @@ export default function Sidebar() {
   const selectedPageId = useSelector(
     (state: RootState) => state.pages.selectedPageId
   );
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
   const handleAddPage = () => {
     dispatch(
@@ -70,6 +74,24 @@ export default function Sidebar() {
     }
   }, []);
 
+  const filterPages = (pages: Page[]) => {
+    return pages.filter((page) => {
+      const matchesSearch = page.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesIcon = !selectedIcon || page.icon === selectedIcon;
+      return matchesSearch && matchesIcon;
+    });
+  };
+
+  const getUniqueIcons = (pages: Page[]): string[] => {
+    const icons = new Set<string>();
+    pages.forEach((page) => {
+      if (page.icon) icons.add(page.icon);
+    });
+    return Array.from(icons);
+  };
+
   return (
     <div
       ref={sidebarRef}
@@ -81,35 +103,93 @@ export default function Sidebar() {
           <LoadingSpinner />
         </div>
       )}
-      <div className="p-2 border-b border-base-300 flex justify-between items-center">
-        {!isCollapsed && (
-          <span className="text-base-content font-medium px-2">Pages</span>
-        )}
-        <div className="flex items-center">
+      <div className="p-2 border-b border-base-300 flex flex-col gap-2">
+        <div className="flex justify-between items-center">
           {!isCollapsed && (
-            <button
-              onClick={handleAddPage}
-              className="btn btn-ghost btn-sm btn-circle"
-              title="New Page"
-            >
-              <Plus size={20} className="text-base-content" />
-            </button>
+            <span className="text-base-content font-medium px-2">Pages</span>
           )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="btn btn-ghost btn-sm btn-circle"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? (
-              <ChevronRight size={20} className="text-base-content" />
-            ) : (
-              <ChevronLeft size={20} className="text-base-content" />
+          <div className="flex items-center gap-1">
+            {!isCollapsed && (
+              <>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="btn btn-ghost btn-sm btn-circle"
+                  title="Filter by icon"
+                >
+                  <Filter
+                    size={18}
+                    className={`text-base-content ${
+                      selectedIcon ? "text-primary" : ""
+                    }`}
+                  />
+                </button>
+                <button
+                  onClick={handleAddPage}
+                  className="btn btn-ghost btn-sm btn-circle"
+                  title="New Page"
+                >
+                  <Plus size={20} className="text-base-content" />
+                </button>
+              </>
             )}
-          </button>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="btn btn-ghost btn-sm btn-circle"
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              {isCollapsed ? (
+                <ChevronRight size={20} className="text-base-content" />
+              ) : (
+                <ChevronLeft size={20} className="text-base-content" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {!isCollapsed && (
+          <>
+            <div className="flex items-center px-2 gap-2">
+              <Search size={16} className="text-base-content opacity-70" />
+              <input
+                type="text"
+                placeholder="Search pages..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input input-sm input-ghost w-full focus:outline-none p-0"
+              />
+            </div>
+
+            {showFilters && (
+              <div className="flex flex-wrap gap-1 px-2">
+                <button
+                  onClick={() => setSelectedIcon(null)}
+                  className={`btn btn-xs ${
+                    !selectedIcon ? "btn-primary" : "btn-ghost"
+                  }`}
+                >
+                  All
+                </button>
+                {getUniqueIcons(pages).map((icon) => (
+                  <button
+                    key={icon}
+                    onClick={() =>
+                      setSelectedIcon(icon === selectedIcon ? null : icon)
+                    }
+                    className={`btn btn-xs ${
+                      icon === selectedIcon ? "btn-primary" : "btn-ghost"
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
+
       <div className="overflow-y-auto flex-1">
-        {pages.map((page) => (
+        {filterPages(pages).map((page) => (
           <div
             key={page._id}
             className="border-b border-base-300 last:border-b-0"
