@@ -1,5 +1,5 @@
 import { Editor } from "@tiptap/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoadingSpinner from "../../UI/LoadingSpinner";
 import AIModal from "./AIModal";
 
@@ -159,7 +159,7 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
                   const color = e.target.value;
                   editor.chain().focus().setColor(color).run();
                 }}
-                value={editor.getAttributes("textStyle").color || "#000000"}
+                value={editor.getAttributes("textStyle").color || "#FFFFFF"}
                 className="w-8 h-8 rounded cursor-pointer"
                 title="Text Color"
               />

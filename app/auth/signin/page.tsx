@@ -12,7 +12,10 @@ export default function SignIn() {
       className="min-h-screen flex flex-col items-center justify-center p-4 bg-base-200"
       data-theme={theme}
     >
-      <Link href="/" className="text-4xl font-bold text-center mb-6 font-mono text-primary hover:opacity-80 transition-opacity">
+      <Link
+        href="/"
+        className="text-4xl font-bold text-center mb-6 font-mono text-primary hover:opacity-80 transition-opacity"
+      >
         Noted.
       </Link>
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
