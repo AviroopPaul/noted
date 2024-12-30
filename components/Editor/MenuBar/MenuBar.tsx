@@ -126,6 +126,64 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
               <option value="Georgia">Georgia</option>
             </select>
 
+            <select
+              onChange={(e) => {
+                const size = e.target.value;
+                if (size === "default") {
+                  editor.chain().focus().unsetFontSize().run();
+                } else {
+                  editor.chain().focus().setFontSize(size).run();
+                }
+              }}
+              className="select select-sm select-ghost border-base-300"
+              value={editor.getAttributes("textStyle").fontSize || "default"}
+            >
+              <option value="default">Size</option>
+              <option value="8pt">8</option>
+              <option value="10pt">10</option>
+              <option value="12pt">12</option>
+              <option value="14pt">14</option>
+              <option value="16pt">16</option>
+              <option value="18pt">18</option>
+              <option value="20pt">20</option>
+              <option value="24pt">24</option>
+              <option value="30pt">30</option>
+              <option value="36pt">36</option>
+              <option value="48pt">48</option>
+            </select>
+
+            <div className="flex items-center">
+              <input
+                type="color"
+                onChange={(e) => {
+                  const color = e.target.value;
+                  editor.chain().focus().setColor(color).run();
+                }}
+                value={editor.getAttributes("textStyle").color || "#000000"}
+                className="w-8 h-8 rounded cursor-pointer"
+                title="Text Color"
+              />
+              <button
+                onClick={() => {
+                  editor.chain().focus().unsetColor().run();
+                  editor.chain().focus().removeEmptyTextStyle().run();
+                }}
+                className="btn btn-xs btn-ghost"
+                title="Clear Color"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                </svg>
+              </button>
+            </div>
+
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`btn btn-sm text-base-content ${
@@ -501,6 +559,24 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
               </svg>
             </button>
 
+            <button
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              className={`btn btn-sm text-base-content ${
+                editor.isActive("blockquote") ? "btn-primary" : "btn-ghost"
+              }`}
+              title="Quote Block"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+                <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
+              </svg>
+            </button>
             <button
               onClick={handleImageUpload}
               className="btn btn-sm text-base-content btn-ghost"

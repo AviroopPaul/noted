@@ -9,6 +9,7 @@ import FontFamily from "@tiptap/extension-font-family";
 import Underline from "@tiptap/extension-underline";
 import { Color } from "@tiptap/extension-color";
 import { createLowlight, all } from "lowlight";
+import { FontSize } from "./FontSize";
 
 const lowlight = createLowlight(all);
 
@@ -42,11 +43,17 @@ export const getExtensions = () => [
   }),
   TextStyle.configure({
     types: ["textStyle"],
+    HTMLAttributes: {
+      class: "text-style",
+    },
   }),
-  Color,
+  Color.configure({
+    types: ["textStyle"],
+  }),
   FontFamily.configure({
     types: ["textStyle"],
     defaultFamily: "Arial",
   }),
   Underline,
+  FontSize,
 ];
