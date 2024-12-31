@@ -6,11 +6,20 @@
   background: transparent;
   color: hsl(var(--bc));
   position: relative;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .ProseMirror p {
   margin: 1em 0;
   color: hsl(var(--bc));
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  overflow-x: auto;
 }
 
 .ProseMirror:focus {
@@ -41,8 +50,10 @@
   padding: 0.2em 0.4em;
   border-radius: 0.3em;
   line-height: 1.2;
-  white-space: pre;
-  tab-size: 4;
+  white-space: pre-wrap !important;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror pre {
@@ -52,6 +63,12 @@
   font-family: "JetBrainsMono", monospace;
   padding: 0.75rem 1rem;
   margin: 1em 0;
+  white-space: pre-wrap !important;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .ProseMirror pre code {
@@ -62,6 +79,10 @@
   line-height: 1.4;
   display: block;
   background-color: #1a1a1a;
+  white-space: pre-wrap !important;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror strong {
@@ -243,4 +264,32 @@ ul[data-type="taskList"] input[type="checkbox"] {
 
 .ProseMirror mark.selected {
   background-color: #fde047;
+}
+
+/* Ensure images don't overflow their containers */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve table display on mobile */
+.ProseMirror table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  table-layout: fixed;
+  width: 100%;
+  overflow-wrap: break-word;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .ProseMirror {
+    font-size: 16px; /* Ensure readable font size on mobile */
+  }
 }

@@ -46,7 +46,7 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none max-w-none text-base-content",
+          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none max-w-none text-base-content break-words whitespace-pre-wrap px-4",
       },
       handlePaste: (view, event, slice) => {
         // Check if we're pasting inside a code block
@@ -126,8 +126,11 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
         {editor && (
           <BubbleMenu
             editor={editor}
-            tippyOptions={{ duration: 100 }}
-            className="bg-base-100 shadow-lg rounded-lg px-2 py-1 border border-base-300 flex gap-1 text-base-content"
+            tippyOptions={{
+              duration: 100,
+              maxWidth: "95vw",
+            }}
+            className="bg-base-100 shadow-lg rounded-lg px-2 py-1 border border-base-300 flex flex-wrap gap-1 text-base-content max-w-[95vw]"
           >
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
@@ -180,10 +183,13 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
         <EditorContent editor={editor} className="text-base-content" />
       </div>
       {codeToInsert && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-base-100 p-4 rounded-lg">
-            <p>This looks like code. How would you like to paste it?</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-base-100 p-4 rounded-lg w-[95vw] max-w-md">
+            <p className="mb-4">
+              This looks like code. How would you like to paste it?
+            </p>
             <select
+              className="w-full mb-4 p-2 rounded border border-base-300"
               value={codeToInsert.language}
               onChange={(e) =>
                 setCodeToInsert({ ...codeToInsert, language: e.target.value })
@@ -194,27 +200,35 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
               <option value="python">Python</option>
               {/* Add more languages */}
             </select>
-            <button
-              onClick={() => {
-                editor
-                  ?.chain()
-                  .focus()
-                  .setCodeBlock({ language: codeToInsert.language })
-                  .insertContent(codeToInsert.text)
-                  .run();
-                setCodeToInsert(null);
-              }}
-            >
-              Insert as Code
-            </button>
-            <button
-              onClick={() => {
-                editor?.chain().focus().insertContent(codeToInsert.text).run();
-                setCodeToInsert(null);
-              }}
-            >
-              Insert as Text
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                className="btn btn-primary w-full sm:w-auto"
+                onClick={() => {
+                  editor
+                    ?.chain()
+                    .focus()
+                    .setCodeBlock({ language: codeToInsert.language })
+                    .insertContent(codeToInsert.text)
+                    .run();
+                  setCodeToInsert(null);
+                }}
+              >
+                Insert as Code
+              </button>
+              <button
+                className="btn btn-outline w-full sm:w-auto"
+                onClick={() => {
+                  editor
+                    ?.chain()
+                    .focus()
+                    .insertContent(codeToInsert.text)
+                    .run();
+                  setCodeToInsert(null);
+                }}
+              >
+                Insert as Text
+              </button>
+            </div>
           </div>
         </div>
       )}

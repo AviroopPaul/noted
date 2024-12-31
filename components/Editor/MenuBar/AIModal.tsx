@@ -68,17 +68,16 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-base-100 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border border-primary/20 shadow-lg shadow-primary/20 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-0">
+      <div className="bg-base-100 rounded-2xl w-full max-w-2xl h-[90vh] sm:max-h-[80vh] flex flex-col border border-primary/20 shadow-lg shadow-primary/20 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
         {/* Header */}
-        <div className="p-4 border-b border-primary/20 flex justify-between items-center bg-base-200/50">
+        <div className="p-3 sm:p-4 border-b border-primary/20 flex justify-between items-center bg-base-200/50">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
             <h2
-              className="text-lg modal-header-gradient"
+              className="text-base sm:text-lg modal-header-gradient"
               style={{
                 fontFamily: "'Quicksand', sans-serif",
-                fontSize: "1.2em",
                 letterSpacing: "0.03em",
               }}
             >
@@ -95,21 +94,23 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
         </div>
 
         {/* Conversation History */}
-        <div className="flex-1 overflow-auto p-4 space-y-4 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
+        <div className="flex-1 overflow-auto p-3 sm:p-4 space-y-3 sm:space-y-4 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
           {conversations.map((conv, index) => (
             <div key={index} className="space-y-2">
               {conv.prompt && (
-                <div className="bg-base-200/50 p-3 rounded-lg border border-base-300">
-                  <p className="font-medium text-sm text-base-content/70 mb-2">
+                <div className="bg-base-200/50 p-2 sm:p-3 rounded-lg border border-base-300">
+                  <p className="font-medium text-xs sm:text-sm text-base-content/70 mb-1 sm:mb-2">
                     You
                   </p>
-                  <p className="mt-1 text-base-content">{conv.prompt}</p>
+                  <p className="mt-1 text-sm sm:text-base text-base-content">
+                    {conv.prompt}
+                  </p>
                 </div>
               )}
-              <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
+              <div className="bg-primary/5 p-2 sm:p-3 rounded-lg border border-primary/20">
                 <div className="flex justify-between items-start">
                   <p
-                    className="font-medium text-sm text-primary mb-2"
+                    className="font-medium text-xs sm:text-sm text-primary mb-1 sm:mb-2"
                     style={{
                       fontFamily: "'Quicksand', sans-serif",
                       letterSpacing: "0.03em",
@@ -125,7 +126,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
+                        className="h-3 w-3 sm:h-4 sm:w-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -140,7 +141,9 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                     </button>
                   )}
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-base-content">{conv.response}</p>
+                <p className="mt-1 whitespace-pre-wrap text-sm sm:text-base text-base-content">
+                  {conv.response}
+                </p>
               </div>
             </div>
           ))}
@@ -149,7 +152,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
         {/* Input Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-4 border-t border-primary/20 bg-base-200/50"
+          className="p-3 sm:p-4 border-t border-primary/20 bg-base-200/50"
         >
           <div className="flex gap-2">
             <input
@@ -157,12 +160,12 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ask anything..."
-              className="input input-bordered flex-1 bg-base-100 border-primary/20 text-base-content focus:border-primary"
+              className="input input-bordered input-sm sm:input-md flex-1 bg-base-100 border-primary/20 text-base-content focus:border-primary"
               disabled={isLoading}
             />
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm sm:btn-md"
               disabled={isLoading || !prompt.trim()}
             >
               {isLoading ? (
@@ -170,7 +173,7 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="h-4 w-4 sm:h-5 sm:w-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

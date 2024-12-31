@@ -81,7 +81,7 @@ export const MobileMenuBar = ({ editor }: MobileMenuBarProps) => {
       {/* Mobile Format Toggle Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden fixed bottom-4 right-4 z-40 btn btn-circle btn-primary shadow-lg"
+        className="md:hidden fixed bottom-4 right-4 z-50 btn btn-circle btn-primary shadow-lg"
       >
         <Menu size={24} />
       </button>
