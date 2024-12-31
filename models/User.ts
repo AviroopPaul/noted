@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    encryptionKey: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

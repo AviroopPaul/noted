@@ -29,7 +29,7 @@ export default function Sidebar() {
   const handleAddPage = () => {
     dispatch(
       createPage({
-        title: "Untitled",
+        title: "",
         content: "",
         isExpanded: false,
       })

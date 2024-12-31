@@ -67,7 +67,7 @@ export default function PageItem({
               )}
               <span className="ml-1">{page.icon || "📄"}</span>
               <span className="ml-2 truncate text-base-content">
-                {page.title}
+                {page.title || "Untitled"}
               </span>
             </>
           )}

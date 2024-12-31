@@ -30,6 +30,7 @@ and many more!
 
 - 📝 Clean and intuitive note-taking interface
 - 🎨 NotedAI - Intelligent AI assistant for enhanced note-taking
+- 🎨 End-to-end AES encryption with unique user keys
 - 🎨 Customizable themes (Light/Dark mode)
 - 🔒 Secure user authentication
 - 📱 Responsive design for all devices
@@ -107,6 +108,16 @@ To learn more about Next.js, take a look at the following resources:
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+## 🔐 Security
+
+All notes in Noted are encrypted using AES encryption. Each user has their own unique encryption key, ensuring that:
+- Notes are encrypted before being stored in the database
+- Only the note owner can decrypt and read their notes
+- Even if the database is compromised, the notes remain secure
+- The encryption/decryption process is completely transparent to users
 
 ## 📄 License
 

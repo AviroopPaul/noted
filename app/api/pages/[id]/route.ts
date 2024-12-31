@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import connectDB from "@/lib/mongodb";
 import Page from "@/models/Page";
+import User from "@/models/User";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { encrypt, decrypt } from "@/lib/encryption";
 
 // Update a page
 export async function PUT(
@@ -18,10 +20,16 @@ export async function PUT(
     const data = await request.json();
     await connectDB();
 
+    const user = await User.findById(session.user.id);
+
     // Make sure we're only updating the fields that were sent
     const updateData = {
       ...data,
       updatedAt: new Date(),
+      content: data.content
+        ? encrypt(data.content, user.encryptionKey)
+        : undefined,
+      title: data.title ? encrypt(data.title, user.encryptionKey) : undefined,
     };
 
     const page = await Page.findOneAndUpdate(
@@ -34,7 +42,13 @@ export async function PUT(
       return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }
 
-    return NextResponse.json(page);
+    const decryptedPage = {
+      ...page.toObject(),
+      content: page.content ? decrypt(page.content, user.encryptionKey) : "",
+      title: page.title ? decrypt(page.title, user.encryptionKey) : "",
+    };
+
+    return NextResponse.json(decryptedPage);
   } catch (error) {
     console.error("Update error:", error);
     return NextResponse.json(

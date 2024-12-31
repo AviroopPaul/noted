@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import { generateUserEncryptionKey } from "@/lib/encryption";
 
 export async function POST(req: Request) {
   try {
@@ -18,10 +19,12 @@ export async function POST(req: Request) {
     }
 
     // Create new user
+    const encryptionKey = generateUserEncryptionKey();
     const user = await User.create({
       name,
       email,
       password,
+      encryptionKey: encryptionKey,
     });
 
     return NextResponse.json(
