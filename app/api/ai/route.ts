@@ -8,8 +8,9 @@ const groq = new Groq({
 export async function POST(request: Request) {
   console.log("Received AI request");
   try {
-    const { prompt } = await request.json();
+    const { prompt, conversationHistory = [] } = await request.json();
     console.log("Received prompt:", prompt);
+    console.log("Conversation history length:", conversationHistory.length);
 
     if (!prompt) {
       console.log("Error: No prompt provided");
@@ -19,14 +20,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Convert conversation history to Groq message format and add new prompt
+    const messages = [
+      ...conversationHistory.map(
+        ({ role, content }: { role: string; content: string }) => ({
+          role,
+          content,
+        })
+      ),
+      {
+        role: "user",
+        content: prompt,
+      },
+    ];
+
     console.log("Making request to Groq API...");
     const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+      messages,
       model: "mixtral-8x7b-32768",
       temperature: 0.7,
       max_tokens: 2048,
@@ -41,11 +51,24 @@ export async function POST(request: Request) {
       throw new Error("No response from AI");
     }
 
-    console.log("Returning successful response");
-    return NextResponse.json({ response });
+    // Add the AI's response to the conversation history
+    const updatedHistory = [
+      ...conversationHistory,
+      { role: "user", content: prompt },
+      { role: "assistant", content: response },
+    ];
+
+    console.log("Returning successful response with updated history");
+    return NextResponse.json({
+      response,
+      conversationHistory: updatedHistory,
+    });
   } catch (error) {
     console.error("Groq API error:", error);
-    console.log("Request failed with error:", error instanceof Error ? error.message : String(error));
+    console.log(
+      "Request failed with error:",
+      error instanceof Error ? error.message : String(error)
+    );
     return NextResponse.json(
       { error: "Failed to process AI request" },
       { status: 500 }

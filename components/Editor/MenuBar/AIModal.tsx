@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LoadingSpinner from "../../UI/LoadingSpinner";
 
 interface AIModalProps {
@@ -6,16 +6,31 @@ interface AIModalProps {
   onClose: () => void;
 }
 
+interface Conversation {
+  role: "user" | "assistant";
+  content: string;
+}
+
 const AIModal = ({ isOpen, onClose }: AIModalProps) => {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversations, setConversations] = useState<
-    Array<{ prompt: string; response: string }>
-  >([
-    {
-      response: "What's on your mind?",
-    } as { prompt: string; response: string },
+  const [conversations, setConversations] = useState<Conversation[]>([
+    { role: "assistant", content: "What's on your mind?" },
   ]);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [prompt]);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,15 +56,15 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({
+          prompt,
+          conversationHistory: conversations,
+        }),
       });
 
       const data = await response.json();
       if (response.ok && data.response) {
-        setConversations((prev) => [
-          ...prev,
-          { prompt, response: data.response },
-        ]);
+        setConversations(data.conversationHistory);
         setPrompt("");
       } else {
         throw new Error(data.error || "Failed to get AI response");
@@ -97,30 +112,30 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
         <div className="flex-1 overflow-auto p-3 sm:p-4 space-y-3 sm:space-y-4 [&::-webkit-scrollbar-thumb]:bg-base-content/20 [&::-webkit-scrollbar]:bg-base-content/5">
           {conversations.map((conv, index) => (
             <div key={index} className="space-y-2">
-              {conv.prompt && (
+              {conv.role === "user" && (
                 <div className="bg-base-200/50 p-2 sm:p-3 rounded-lg border border-base-300">
                   <p className="font-medium text-xs sm:text-sm text-base-content/70 mb-1 sm:mb-2">
                     You
                   </p>
                   <p className="mt-1 text-sm sm:text-base text-base-content">
-                    {conv.prompt}
+                    {conv.content}
                   </p>
                 </div>
               )}
-              <div className="bg-primary/5 p-2 sm:p-3 rounded-lg border border-primary/20">
-                <div className="flex justify-between items-start">
-                  <p
-                    className="font-medium text-xs sm:text-sm text-primary mb-1 sm:mb-2"
-                    style={{
-                      fontFamily: "'Quicksand', sans-serif",
-                      letterSpacing: "0.03em",
-                    }}
-                  >
-                    NotedAI
-                  </p>
-                  {conv.prompt && (
+              {conv.role === "assistant" && (
+                <div className="bg-primary/5 p-2 sm:p-3 rounded-lg border border-primary/20">
+                  <div className="flex justify-between items-start">
+                    <p
+                      className="font-medium text-xs sm:text-sm text-primary mb-1 sm:mb-2"
+                      style={{
+                        fontFamily: "'Quicksand', sans-serif",
+                        letterSpacing: "0.03em",
+                      }}
+                    >
+                      NotedAI
+                    </p>
                     <button
-                      onClick={() => copyToClipboard(conv.response)}
+                      onClick={() => copyToClipboard(conv.content)}
                       className="btn btn-ghost btn-xs text-base-content"
                       title="Copy response"
                     >
@@ -139,12 +154,12 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
                         />
                       </svg>
                     </button>
-                  )}
+                  </div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm sm:text-base text-base-content">
+                    {conv.content}
+                  </p>
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm sm:text-base text-base-content">
-                  {conv.response}
-                </p>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -155,13 +170,20 @@ const AIModal = ({ isOpen, onClose }: AIModalProps) => {
           className="p-3 sm:p-4 border-t border-primary/20 bg-base-200/50"
         >
           <div className="flex gap-2">
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ask anything..."
-              className="input input-bordered input-sm sm:input-md flex-1 bg-base-100 border-primary/20 text-base-content focus:border-primary"
+              className="textarea textarea-bordered textarea-sm sm:textarea-md flex-1 bg-base-100 border-primary/20 text-base-content focus:border-primary resize-none min-h-[2.5rem] sm:min-h-[3rem] max-h-32 overflow-y-auto"
               disabled={isLoading}
+              rows={1}
+              onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
             />
             <button
               type="submit"
