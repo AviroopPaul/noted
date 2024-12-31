@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  ChevronDown,
-  User,
-  ChevronRight,
-  Search,
-  Settings,
-  Clock,
-} from "lucide-react";
+import { User, ChevronRight, Search, Settings, Clock } from "lucide-react";
 import { THEMES } from "@/lib/constants/themes";
 import { useTheme } from "@/app/ThemeContext";
 import { useDateTimeSettings } from "@/app/DateTimeContext";
@@ -34,7 +27,6 @@ export function UserDropdown({ username }: { username: string }) {
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
   const [isDateTimeSettingsOpen, setIsDateTimeSettingsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { updateSettings } = useDateTimeSettings();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

@@ -16,6 +16,7 @@ import { AppDispatch } from "@/store/store";
 import Footer from "@/components/Footer/Footer";
 import CoverImageModal from "@/components/CoverImageModal/CoverImageModal";
 import { debounce } from "lodash";
+import MobileSidebar from "@/components/Mobile/MobileSidebar";
 
 const RichTextEditor = dynamic(
   () => import("@/components/Editor/RichTextEditor"),
@@ -162,7 +163,12 @@ export default function Home() {
     <main className="min-h-screen bg-base-100 flex flex-col">
       <Header />
       <div className="flex flex-1 h-[calc(100vh-57px-53px)]">
-        {session && <Sidebar />}
+        {session && (
+          <>
+            <Sidebar />
+            <MobileSidebar />
+          </>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col bg-base-100">

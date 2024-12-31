@@ -2,6 +2,7 @@ import { Editor } from "@tiptap/react";
 import { useState, useEffect } from "react";
 import LoadingSpinner from "../../UI/LoadingSpinner";
 import AIModal from "./AIModal";
+import MobileMenuBar from "../../Mobile/MobileMenuBar";
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -77,205 +78,342 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
 
   return (
     <>
-      <div className="relative bg-base-100 border-b border-base-300">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute top-2 left-2 z-10 p-2 hover:bg-base-200 rounded-lg text-base-content"
-          title="Formatting Options"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transition-transform duration-200 ${
-              isExpanded ? "rotate-180" : ""
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      <div className="md:hidden">
+        <MobileMenuBar editor={editor} />
+      </div>
+
+      <div className="hidden md:block">
+        <div className="relative bg-base-100 border-b border-base-300">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="absolute top-2 left-2 z-10 p-2 hover:bg-base-200 rounded-lg text-base-content"
+            title="Formatting Options"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-
-        <div
-          className={`transition-all duration-200 ease-in-out text-base-content bg-base-100 ${
-            isExpanded ? "ml-0 opacity-100" : "-ml-[200px] opacity-0"
-          } pl-12`}
-        >
-          <div className="flex flex-wrap gap-2 p-2 text-base-content ">
-            <select
-              onChange={(e) => {
-                const family = e.target.value;
-                if (family === "default") {
-                  editor.chain().focus().clearNodes().run();
-                } else {
-                  editor.chain().focus().setFontFamily(family).run();
-                }
-              }}
-              className="select select-sm select-ghost border-base-300"
-              value={editor.getAttributes("textStyle").fontFamily || "default"}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-5 w-5 transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <option value="default">Font</option>
-              <option value="Arial">Arial</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Courier New">Courier New</option>
-              <option value="Georgia">Georgia</option>
-            </select>
-
-            <select
-              onChange={(e) => {
-                const size = e.target.value;
-                if (size === "default") {
-                  editor.chain().focus().unsetFontSize().run();
-                } else {
-                  editor.chain().focus().setFontSize(size).run();
-                }
-              }}
-              className="select select-sm select-ghost border-base-300"
-              value={editor.getAttributes("textStyle").fontSize || "default"}
-            >
-              <option value="default">Size</option>
-              <option value="8pt">8</option>
-              <option value="10pt">10</option>
-              <option value="12pt">12</option>
-              <option value="14pt">14</option>
-              <option value="16pt">16</option>
-              <option value="18pt">18</option>
-              <option value="20pt">20</option>
-              <option value="24pt">24</option>
-              <option value="30pt">30</option>
-              <option value="36pt">36</option>
-              <option value="48pt">48</option>
-            </select>
-
-            <div className="flex items-center">
-              <input
-                type="color"
-                onChange={(e) => {
-                  const color = e.target.value;
-                  editor.chain().focus().setColor(color).run();
-                }}
-                value={editor.getAttributes("textStyle").color || "#FFFFFF"}
-                className="w-8 h-8 rounded cursor-pointer"
-                title="Text Color"
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
               />
-              <button
-                onClick={() => {
-                  editor.chain().focus().unsetColor().run();
-                  editor.chain().focus().removeEmptyTextStyle().run();
+            </svg>
+          </button>
+
+          <div
+            className={`transition-all duration-200 ease-in-out text-base-content bg-base-100 ${
+              isExpanded ? "ml-0 opacity-100" : "-ml-[200px] opacity-0"
+            } pl-12`}
+          >
+            <div className="flex flex-wrap gap-2 p-2 text-base-content ">
+              <select
+                onChange={(e) => {
+                  const family = e.target.value;
+                  if (family === "default") {
+                    editor.chain().focus().clearNodes().run();
+                  } else {
+                    editor.chain().focus().setFontFamily(family).run();
+                  }
                 }}
-                className="btn btn-xs btn-ghost"
-                title="Clear Color"
+                className="select select-sm select-ghost border-base-300"
+                value={
+                  editor.getAttributes("textStyle").fontFamily || "default"
+                }
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
+                <option value="default">Font</option>
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+
+              <select
+                onChange={(e) => {
+                  const size = e.target.value;
+                  if (size === "default") {
+                    editor.chain().focus().unsetFontSize().run();
+                  } else {
+                    editor.chain().focus().setFontSize(size).run();
+                  }
+                }}
+                className="select select-sm select-ghost border-base-300"
+                value={editor.getAttributes("textStyle").fontSize || "default"}
+              >
+                <option value="default">Size</option>
+                <option value="8pt">8</option>
+                <option value="10pt">10</option>
+                <option value="12pt">12</option>
+                <option value="14pt">14</option>
+                <option value="16pt">16</option>
+                <option value="18pt">18</option>
+                <option value="20pt">20</option>
+                <option value="24pt">24</option>
+                <option value="30pt">30</option>
+                <option value="36pt">36</option>
+                <option value="48pt">48</option>
+              </select>
+
+              <div className="flex items-center">
+                <input
+                  type="color"
+                  onChange={(e) => {
+                    const color = e.target.value;
+                    editor.chain().focus().setColor(color).run();
+                  }}
+                  value={editor.getAttributes("textStyle").color || "#FFFFFF"}
+                  className="w-8 h-8 rounded cursor-pointer"
+                  title="Text Color"
+                />
+                <button
+                  onClick={() => {
+                    editor.chain().focus().unsetColor().run();
+                    editor.chain().focus().removeEmptyTextStyle().run();
+                  }}
+                  className="btn btn-xs btn-ghost"
+                  title="Clear Color"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
-                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
-                </svg>
-              </button>
-            </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
+                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
+                  </svg>
+                </button>
+              </div>
 
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("bold") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Bold"
-            >
-              <strong>B</strong>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("italic") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Italic"
-            >
-              <em>I</em>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("underline") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Underline"
-            >
-              <span style={{ textDecoration: "underline" }}>U</span>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("strike") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Strikethrough"
-            >
-              <span style={{ textDecoration: "line-through" }}>S</span>
-            </button>
-            <div className="btn-group">
               <button
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 1 }).run()
-                }
+                onClick={() => editor.chain().focus().toggleBold().run()}
                 className={`btn btn-sm text-base-content ${
-                  editor.isActive("heading", { level: 1 })
-                    ? "btn-primary"
-                    : "btn-ghost"
+                  editor.isActive("bold") ? "btn-primary" : "btn-ghost"
                 }`}
-                title="Heading 1"
+                title="Bold"
               >
-                <span className="font-bold text-lg">H1</span>
+                <strong>B</strong>
               </button>
-              <button
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 2 }).run()
-                }
-                className={`btn btn-sm text-base-content ${
-                  editor.isActive("heading", { level: 2 })
-                    ? "btn-primary"
-                    : "btn-ghost"
-                }`}
-                title="Heading 2"
-              >
-                <span className="font-bold text-md">H2</span>
-              </button>
-              <button
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 3 }).run()
-                }
-                className={`btn btn-sm text-base-content ${
-                  editor.isActive("heading", { level: 3 })
-                    ? "btn-primary"
-                    : "btn-ghost"
-                }`}
-                title="Heading 3"
-              >
-                <span className="font-bold text-xs">H3</span>
-              </button>
-            </div>
 
-            <div className="btn-group">
               <button
-                onClick={() =>
-                  editor.chain().focus().setTextAlign("left").run()
-                }
+                onClick={() => editor.chain().focus().toggleItalic().run()}
                 className={`btn btn-sm text-base-content ${
-                  editor.isActive({ textAlign: "left" })
-                    ? "btn-primary"
-                    : "btn-ghost"
+                  editor.isActive("italic") ? "btn-primary" : "btn-ghost"
                 }`}
-                title="Align Left"
+                title="Italic"
+              >
+                <em>I</em>
+              </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("underline") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Underline"
+              >
+                <span style={{ textDecoration: "underline" }}>U</span>
+              </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("strike") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Strikethrough"
+              >
+                <span style={{ textDecoration: "line-through" }}>S</span>
+              </button>
+              <div className="btn-group">
+                <button
+                  onClick={() =>
+                    editor.chain().focus().toggleHeading({ level: 1 }).run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive("heading", { level: 1 })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Heading 1"
+                >
+                  <span className="font-bold text-lg">H1</span>
+                </button>
+                <button
+                  onClick={() =>
+                    editor.chain().focus().toggleHeading({ level: 2 }).run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive("heading", { level: 2 })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Heading 2"
+                >
+                  <span className="font-bold text-md">H2</span>
+                </button>
+                <button
+                  onClick={() =>
+                    editor.chain().focus().toggleHeading({ level: 3 }).run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive("heading", { level: 3 })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Heading 3"
+                >
+                  <span className="font-bold text-xs">H3</span>
+                </button>
+              </div>
+
+              <div className="btn-group">
+                <button
+                  onClick={() =>
+                    editor.chain().focus().setTextAlign("left").run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive({ textAlign: "left" })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Align Left"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <line
+                      x1="3"
+                      y1="6"
+                      x2="21"
+                      y2="6"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="3"
+                      y1="12"
+                      x2="15"
+                      y2="12"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="3"
+                      y1="18"
+                      x2="18"
+                      y2="18"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() =>
+                    editor.chain().focus().setTextAlign("center").run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive({ textAlign: "center" })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Align Center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <line
+                      x1="3"
+                      y1="6"
+                      x2="21"
+                      y2="6"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="6"
+                      y1="12"
+                      x2="18"
+                      y2="12"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="4"
+                      y1="18"
+                      x2="20"
+                      y2="18"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={() =>
+                    editor.chain().focus().setTextAlign("right").run()
+                  }
+                  className={`btn btn-sm text-base-content ${
+                    editor.isActive({ textAlign: "right" })
+                      ? "btn-primary"
+                      : "btn-ghost"
+                  }`}
+                  title="Align Right"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <line
+                      x1="3"
+                      y1="6"
+                      x2="21"
+                      y2="6"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="9"
+                      y1="12"
+                      x2="21"
+                      y2="12"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="6"
+                      y1="18"
+                      x2="21"
+                      y2="18"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <button
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("bulletList") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Bullet List"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -285,97 +423,9 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
                   stroke="currentColor"
                 >
                   <line
-                    x1="3"
+                    x1="9"
                     y1="6"
-                    x2="21"
-                    y2="6"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="3"
-                    y1="12"
-                    x2="15"
-                    y2="12"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="3"
-                    y1="18"
-                    x2="18"
-                    y2="18"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() =>
-                  editor.chain().focus().setTextAlign("center").run()
-                }
-                className={`btn btn-sm text-base-content ${
-                  editor.isActive({ textAlign: "center" })
-                    ? "btn-primary"
-                    : "btn-ghost"
-                }`}
-                title="Align Center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <line
-                    x1="3"
-                    y1="6"
-                    x2="21"
-                    y2="6"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="6"
-                    y1="12"
-                    x2="18"
-                    y2="12"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1="4"
-                    y1="18"
                     x2="20"
-                    y2="18"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() =>
-                  editor.chain().focus().setTextAlign("right").run()
-                }
-                className={`btn btn-sm text-base-content ${
-                  editor.isActive({ textAlign: "right" })
-                    ? "btn-primary"
-                    : "btn-ghost"
-                }`}
-                title="Align Right"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <line
-                    x1="3"
-                    y1="6"
-                    x2="21"
                     y2="6"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -383,209 +433,32 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
                   <line
                     x1="9"
                     y1="12"
-                    x2="21"
+                    x2="20"
                     y2="12"
                     strokeWidth="2"
                     strokeLinecap="round"
                   />
                   <line
-                    x1="6"
+                    x1="9"
                     y1="18"
-                    x2="21"
+                    x2="20"
                     y2="18"
                     strokeWidth="2"
                     strokeLinecap="round"
                   />
+                  <circle cx="4" cy="6" r="2" fill="currentColor" />
+                  <circle cx="4" cy="12" r="2" fill="currentColor" />
+                  <circle cx="4" cy="18" r="2" fill="currentColor" />
                 </svg>
               </button>
-            </div>
 
-            <button
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("bulletList") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Bullet List"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
+              <button
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("orderedList") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Numbered List"
               >
-                <line
-                  x1="9"
-                  y1="6"
-                  x2="20"
-                  y2="6"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="9"
-                  y1="12"
-                  x2="20"
-                  y2="12"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="9"
-                  y1="18"
-                  x2="20"
-                  y2="18"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <circle cx="4" cy="6" r="2" fill="currentColor" />
-                <circle cx="4" cy="12" r="2" fill="currentColor" />
-                <circle cx="4" cy="18" r="2" fill="currentColor" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("orderedList") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Numbered List"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <line
-                  x1="9"
-                  y1="6"
-                  x2="20"
-                  y2="6"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="9"
-                  y1="12"
-                  x2="20"
-                  y2="12"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="9"
-                  y1="18"
-                  x2="20"
-                  y2="18"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <text x="2" y="7" fontSize="8" fill="currentColor">
-                  1
-                </text>
-                <text x="2" y="13" fontSize="8" fill="currentColor">
-                  2
-                </text>
-                <text x="2" y="19" fontSize="8" fill="currentColor">
-                  3
-                </text>
-              </svg>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleTaskList().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("taskList") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Task List"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <rect x="3" y="5" width="4" height="4" strokeWidth="2" />
-                <line
-                  x1="9"
-                  y1="7"
-                  x2="20"
-                  y2="7"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <rect x="3" y="13" width="4" height="4" strokeWidth="2" />
-                <line
-                  x1="9"
-                  y1="15"
-                  x2="20"
-                  y2="15"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path d="M4 14 L5 16 L7 13" strokeWidth="1" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("codeBlock") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Code Block"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <polyline
-                  points="16 18 22 12 16 6"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <polyline
-                  points="8 6 2 12 8 18"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className={`btn btn-sm text-base-content ${
-                editor.isActive("blockquote") ? "btn-primary" : "btn-ghost"
-              }`}
-              title="Quote Block"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
-                <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleImageUpload}
-              className="btn btn-sm text-base-content btn-ghost"
-              title="Insert Image"
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <LoadingSpinner size="small" />
-              ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -593,72 +466,208 @@ export const MenuBar = ({ editor }: MenuBarProps) => {
                   fill="none"
                   stroke="currentColor"
                 >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
+                  <line
+                    x1="9"
+                    y1="6"
+                    x2="20"
+                    y2="6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="9"
+                    y1="12"
+                    x2="20"
+                    y2="12"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="9"
+                    y1="18"
+                    x2="20"
+                    y2="18"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <text x="2" y="7" fontSize="8" fill="currentColor">
+                    1
+                  </text>
+                  <text x="2" y="13" fontSize="8" fill="currentColor">
+                    2
+                  </text>
+                  <text x="2" y="19" fontSize="8" fill="currentColor">
+                    3
+                  </text>
                 </svg>
-              )}
-            </button>
+              </button>
 
-            <button
-              onClick={handleAIFormat}
-              disabled={isFormatting}
-              className="btn btn-sm btn-ghost flex items-center gap-1"
-              title="AI Format"
-            >
-              {isFormatting ? (
-                <LoadingSpinner size="small" />
-              ) : (
-                <>
-                  <span
-                    style={{
-                      background: `linear-gradient(
-                        45deg,
-                        oklch(var(--p)) 0%,
-                        oklch(var(--s)) 33%,
-                        oklch(var(--a)) 66%,
-                        oklch(var(--p)) 100%
-                      )`,
-                      backgroundSize: "300% auto",
-                      WebkitBackgroundClip: "text",
-                      backgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      animation: "gradient 3s linear infinite",
-                    }}
-                    className="font-bold text-lg"
-                  >
-                    AI-Format{" "}
-                  </span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={() => setIsAIModalOpen(true)}
-              className="btn btn-sm btn-ghost flex items-center gap-1 group"
-              title="AI Assistant"
-            >
-              <span
-                style={{
-                  background: `linear-gradient(
-                    45deg,
-                    oklch(var(--p)) 0%,
-                    oklch(var(--s)) 33%,
-                    oklch(var(--a)) 66%,
-                    oklch(var(--p)) 100%
-                  )`,
-                  backgroundSize: "300% auto",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  animation: "gradient 3s linear infinite",
-                }}
-                className="font-bold text-lg"
+              <button
+                onClick={() => editor.chain().focus().toggleTaskList().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("taskList") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Task List"
               >
-                <span className="text-sm">✨</span> NotedAI{" "}
-                <span className="text-sm">✨</span>
-              </span>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <rect x="3" y="5" width="4" height="4" strokeWidth="2" />
+                  <line
+                    x1="9"
+                    y1="7"
+                    x2="20"
+                    y2="7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <rect x="3" y="13" width="4" height="4" strokeWidth="2" />
+                  <line
+                    x1="9"
+                    y1="15"
+                    x2="20"
+                    y2="15"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <path d="M4 14 L5 16 L7 13" strokeWidth="1" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("codeBlock") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Code Block"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <polyline
+                    points="16 18 22 12 16 6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <polyline
+                    points="8 6 2 12 8 18"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                className={`btn btn-sm text-base-content ${
+                  editor.isActive("blockquote") ? "btn-primary" : "btn-ghost"
+                }`}
+                title="Quote Block"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+                  <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
+                </svg>
+              </button>
+              <button
+                onClick={handleImageUpload}
+                className="btn btn-sm text-base-content btn-ghost"
+                title="Insert Image"
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <LoadingSpinner size="small" />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                )}
+              </button>
+
+              <button
+                onClick={handleAIFormat}
+                disabled={isFormatting}
+                className="btn btn-sm btn-ghost flex items-center gap-1"
+                title="AI Format"
+              >
+                {isFormatting ? (
+                  <LoadingSpinner size="small" />
+                ) : (
+                  <>
+                    <span
+                      style={{
+                        background: `linear-gradient(
+                          45deg,
+                          oklch(var(--p)) 0%,
+                          oklch(var(--s)) 33%,
+                          oklch(var(--a)) 66%,
+                          oklch(var(--p)) 100%
+                        )`,
+                        backgroundSize: "300% auto",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        animation: "gradient 3s linear infinite",
+                      }}
+                      className="font-bold text-lg"
+                    >
+                      AI-Format{" "}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsAIModalOpen(true)}
+                className="btn btn-sm btn-ghost flex items-center gap-1 group"
+                title="AI Assistant"
+              >
+                <span
+                  style={{
+                    background: `linear-gradient(
+                      45deg,
+                      oklch(var(--p)) 0%,
+                      oklch(var(--s)) 33%,
+                      oklch(var(--a)) 66%,
+                      oklch(var(--p)) 100%
+                    )`,
+                    backgroundSize: "300% auto",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    animation: "gradient 3s linear infinite",
+                  }}
+                  className="font-bold text-lg"
+                >
+                  <span className="text-sm">✨</span> NotedAI{" "}
+                  <span className="text-sm">✨</span>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

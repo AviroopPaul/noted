@@ -109,11 +109,10 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-
-
 ## 🔐 Security
 
 All notes in Noted are encrypted using AES encryption. Each user has their own unique encryption key, ensuring that:
+
 - Notes are encrypted before being stored in the database
 - Only the note owner can decrypt and read their notes
 - Even if the database is compromised, the notes remain secure

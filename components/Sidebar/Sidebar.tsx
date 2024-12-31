@@ -95,7 +95,7 @@ export default function Sidebar() {
   return (
     <div
       ref={sidebarRef}
-      className={`transition-all duration-300 border-r border-base-300 bg-base-200 flex flex-col relative`}
+      className={`hidden md:flex transition-all duration-300 border-r border-base-300 bg-base-200 flex-col relative`}
       style={{ width: isCollapsed ? MIN_WIDTH : width }}
     >
       {isLoading && (
