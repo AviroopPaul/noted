@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { User, ChevronRight, Search, Settings, Clock } from "lucide-react";
+import {
+  User,
+  ChevronRight,
+  Search,
+  Settings,
+  Clock,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { THEMES } from "@/lib/constants/themes";
 import { useTheme } from "@/app/ThemeContext";
 import { useDateTimeSettings } from "@/app/DateTimeContext";
@@ -18,6 +26,12 @@ interface Themes {
 
 const typedThemes = THEMES as Themes;
 
+interface AutoThemeSettings {
+  enabled: boolean;
+  lightTheme: string;
+  darkTheme: string;
+}
+
 export function UserDropdown({ username }: { username: string }) {
   const { theme, updateUserDefaultTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,6 +41,13 @@ export function UserDropdown({ username }: { username: string }) {
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
   const [isDateTimeSettingsOpen, setIsDateTimeSettingsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [autoThemeSettings, setAutoThemeSettings] = useState<AutoThemeSettings>(
+    {
+      enabled: false,
+      lightTheme: typedThemes.light[0]?.id || "",
+      darkTheme: typedThemes.dark[0]?.id || "",
+    }
+  );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -58,6 +79,18 @@ export function UserDropdown({ username }: { username: string }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (autoThemeSettings.enabled) {
+      const now = new Date();
+      const hours = now.getHours();
+      const isDaytime = hours >= 6 && hours < 18;
+
+      handleThemeSelect(
+        isDaytime ? autoThemeSettings.lightTheme : autoThemeSettings.darkTheme
+      );
+    }
+  }, [autoThemeSettings]);
 
   const handleThemeSelect = async (themeId: string) => {
     try {
@@ -110,17 +143,78 @@ export function UserDropdown({ username }: { username: string }) {
         }`}
       >
         <li>
-          <button
-            onClick={handleThemeDropdownClick}
-            className="hover:bg-base-300 w-full flex items-center justify-between px-3"
-          >
+          <label className="hover:bg-base-300 w-full flex items-center justify-between px-3">
             <div className="flex items-center gap-2">
-              {currentThemeIcon}
-              <span>Set Default Theme</span>
+              {autoThemeSettings.enabled ? (
+                <Sun size={16} />
+              ) : (
+                <Moon size={16} />
+              )}
+              <span>Auto Theming</span>
             </div>
-            <ChevronRight size={16} />
-          </button>
+            <input
+              type="checkbox"
+              className="toggle toggle-sm"
+              checked={autoThemeSettings.enabled}
+              onChange={(e) =>
+                setAutoThemeSettings((prev) => ({
+                  ...prev,
+                  enabled: e.target.checked,
+                }))
+              }
+            />
+          </label>
         </li>
+        {autoThemeSettings.enabled && (
+          <>
+            <li>
+              <button
+                onClick={() => {
+                  setIsThemeDropdownOpen(true);
+                  setLightExpanded(true);
+                  setDarkExpanded(false);
+                }}
+                className="hover:bg-base-300 w-full flex items-center justify-between px-3 pl-8"
+              >
+                <div className="flex items-center gap-2">
+                  <Sun size={16} />
+                  <span>Select Light Mode Theme</span>
+                </div>
+                <ChevronRight size={16} />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setIsThemeDropdownOpen(true);
+                  setDarkExpanded(true);
+                  setLightExpanded(false);
+                }}
+                className="hover:bg-base-300 w-full flex items-center justify-between px-3 pl-8"
+              >
+                <div className="flex items-center gap-2">
+                  <Moon size={16} />
+                  <span>Select Dark Mode Theme</span>
+                </div>
+                <ChevronRight size={16} />
+              </button>
+            </li>
+          </>
+        )}
+        {!autoThemeSettings.enabled && (
+          <li>
+            <button
+              onClick={handleThemeDropdownClick}
+              className="hover:bg-base-300 w-full flex items-center justify-between px-3"
+            >
+              <div className="flex items-center gap-2">
+                {currentThemeIcon}
+                <span>Set Default Theme</span>
+              </div>
+              <ChevronRight size={16} />
+            </button>
+          </li>
+        )}
         <li>
           <button
             onClick={handleDateTimeSettingsClick}
@@ -159,31 +253,37 @@ export function UserDropdown({ username }: { username: string }) {
           <div className="max-h-[300px] overflow-y-auto">
             {/* Light Themes Section */}
             <div className="mb-2">
-              <button
-                onClick={() => setLightExpanded(!lightExpanded)}
-                className="w-full px-2 py-1.5 flex items-center gap-2 hover:bg-base-300 transition-colors"
-              >
-                <ChevronRight
-                  size={14}
-                  className={`transform transition-transform text-base-content/70 ${
-                    lightExpanded ? "rotate-90" : ""
-                  }`}
-                />
+              <div className="w-full px-2 py-1.5 flex items-center gap-2">
                 <span className="text-xs font-semibold text-base-content/70">
-                  Light Themes
+                  {autoThemeSettings.enabled
+                    ? "Select Light Mode Theme"
+                    : "Light Themes"}
                 </span>
-              </button>
+              </div>
               <div
-                className={`transition-all duration-200 ${
-                  lightExpanded ? "max-h-[500px]" : "max-h-0"
-                } overflow-hidden`}
+                className={`${
+                  !autoThemeSettings.enabled || lightExpanded ? "" : "hidden"
+                }`}
               >
                 {filteredThemes.light.map((themeOption) => (
                   <li key={themeOption.id}>
                     <button
-                      onClick={() => handleThemeSelect(themeOption.id)}
+                      onClick={() => {
+                        if (autoThemeSettings.enabled) {
+                          setAutoThemeSettings((prev) => ({
+                            ...prev,
+                            lightTheme: themeOption.id,
+                          }));
+                        } else {
+                          handleThemeSelect(themeOption.id);
+                        }
+                      }}
                       className={`flex items-center gap-2 px-4 py-2 hover:bg-base-300 w-full ${
-                        theme === themeOption.id ? "bg-base-300" : ""
+                        (autoThemeSettings.enabled
+                          ? autoThemeSettings.lightTheme
+                          : theme) === themeOption.id
+                          ? "bg-base-300"
+                          : ""
                       }`}
                     >
                       {themeOption.icon}
@@ -196,31 +296,37 @@ export function UserDropdown({ username }: { username: string }) {
 
             {/* Dark Themes Section */}
             <div className="mb-2">
-              <button
-                onClick={() => setDarkExpanded(!darkExpanded)}
-                className="w-full px-2 py-1.5 flex items-center gap-2 hover:bg-base-300 transition-colors"
-              >
-                <ChevronRight
-                  size={14}
-                  className={`transform transition-transform text-base-content/70 ${
-                    darkExpanded ? "rotate-90" : ""
-                  }`}
-                />
+              <div className="w-full px-2 py-1.5 flex items-center gap-2">
                 <span className="text-xs font-semibold text-base-content/70">
-                  Dark Themes
+                  {autoThemeSettings.enabled
+                    ? "Select Dark Mode Theme"
+                    : "Dark Themes"}
                 </span>
-              </button>
+              </div>
               <div
-                className={`transition-all duration-200 ${
-                  darkExpanded ? "max-h-[500px]" : "max-h-0"
-                } overflow-hidden`}
+                className={`${
+                  !autoThemeSettings.enabled || darkExpanded ? "" : "hidden"
+                }`}
               >
                 {filteredThemes.dark.map((themeOption) => (
                   <li key={themeOption.id}>
                     <button
-                      onClick={() => handleThemeSelect(themeOption.id)}
+                      onClick={() => {
+                        if (autoThemeSettings.enabled) {
+                          setAutoThemeSettings((prev) => ({
+                            ...prev,
+                            darkTheme: themeOption.id,
+                          }));
+                        } else {
+                          handleThemeSelect(themeOption.id);
+                        }
+                      }}
                       className={`flex items-center gap-2 px-4 py-2 hover:bg-base-300 w-full ${
-                        theme === themeOption.id ? "bg-base-300" : ""
+                        (autoThemeSettings.enabled
+                          ? autoThemeSettings.darkTheme
+                          : theme) === themeOption.id
+                          ? "bg-base-300"
+                          : ""
                       }`}
                     >
                       {themeOption.icon}
