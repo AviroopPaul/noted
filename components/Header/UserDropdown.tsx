@@ -81,16 +81,78 @@ export function UserDropdown({ username }: { username: string }) {
   }, []);
 
   useEffect(() => {
-    if (autoThemeSettings.enabled) {
-      const now = new Date();
-      const hours = now.getHours();
-      const isDaytime = hours >= 6 && hours < 18;
+    const loadInitialTheme = async () => {
+      try {
+        const response = await fetch("/api/user/auto-theme");
+        if (!response.ok) {
+          throw new Error("Failed to fetch auto theme settings");
+        }
+        const data = await response.json();
 
-      handleThemeSelect(
-        isDaytime ? autoThemeSettings.lightTheme : autoThemeSettings.darkTheme
-      );
+        // If auto theme is enabled, immediately apply the appropriate theme
+        if (data.autoTheme.enabled) {
+          const now = new Date();
+          const hours = now.getHours();
+          const isDaytime = hours >= 6 && hours < 18;
+
+          handleThemeSelect(
+            isDaytime ? data.autoTheme.lightTheme : data.autoTheme.darkTheme
+          );
+        }
+
+        setAutoThemeSettings(data.autoTheme);
+      } catch (error) {
+        console.error("Error loading auto theme settings:", error);
+      }
+    };
+
+    loadInitialTheme();
+  }, []); // Run only once on mount
+
+  const saveAutoThemeSettings = async (settings: AutoThemeSettings) => {
+    try {
+      const response = await fetch("/api/user/auto-theme", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save auto theme settings");
+      }
+    } catch (error) {
+      console.error("Error saving auto theme settings:", error);
     }
-  }, [autoThemeSettings]);
+  };
+
+  useEffect(() => {
+    if (autoThemeSettings.enabled) {
+      const checkTime = () => {
+        const now = new Date();
+        const hours = now.getHours();
+        const isDaytime = hours >= 6 && hours < 18; // 6 AM to 6 PM
+
+        // Force update the theme regardless of default theme
+        handleThemeSelect(
+          isDaytime ? autoThemeSettings.lightTheme : autoThemeSettings.darkTheme
+        );
+      };
+
+      // Check immediately when enabled
+      checkTime();
+
+      // Check every minute for theme changes
+      const interval = setInterval(checkTime, 60000);
+
+      return () => clearInterval(interval);
+    }
+  }, [
+    autoThemeSettings.enabled,
+    autoThemeSettings.lightTheme,
+    autoThemeSettings.darkTheme,
+  ]);
 
   const handleThemeSelect = async (themeId: string) => {
     try {
@@ -156,12 +218,14 @@ export function UserDropdown({ username }: { username: string }) {
               type="checkbox"
               className="toggle toggle-sm"
               checked={autoThemeSettings.enabled}
-              onChange={(e) =>
-                setAutoThemeSettings((prev) => ({
-                  ...prev,
+              onChange={async (e) => {
+                const newSettings = {
+                  ...autoThemeSettings,
                   enabled: e.target.checked,
-                }))
-              }
+                };
+                setAutoThemeSettings(newSettings);
+                await saveAutoThemeSettings(newSettings);
+              }}
             />
           </label>
         </li>
@@ -169,7 +233,7 @@ export function UserDropdown({ username }: { username: string }) {
           <>
             <li>
               <button
-                onClick={() => {
+                onClick={async () => {
                   setIsThemeDropdownOpen(true);
                   setLightExpanded(true);
                   setDarkExpanded(false);
@@ -185,7 +249,7 @@ export function UserDropdown({ username }: { username: string }) {
             </li>
             <li>
               <button
-                onClick={() => {
+                onClick={async () => {
                   setIsThemeDropdownOpen(true);
                   setDarkExpanded(true);
                   setLightExpanded(false);
@@ -268,12 +332,14 @@ export function UserDropdown({ username }: { username: string }) {
                 {filteredThemes.light.map((themeOption) => (
                   <li key={themeOption.id}>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         if (autoThemeSettings.enabled) {
-                          setAutoThemeSettings((prev) => ({
-                            ...prev,
+                          const newSettings = {
+                            ...autoThemeSettings,
                             lightTheme: themeOption.id,
-                          }));
+                          };
+                          setAutoThemeSettings(newSettings);
+                          await saveAutoThemeSettings(newSettings);
                         } else {
                           handleThemeSelect(themeOption.id);
                         }
@@ -311,12 +377,14 @@ export function UserDropdown({ username }: { username: string }) {
                 {filteredThemes.dark.map((themeOption) => (
                   <li key={themeOption.id}>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         if (autoThemeSettings.enabled) {
-                          setAutoThemeSettings((prev) => ({
-                            ...prev,
+                          const newSettings = {
+                            ...autoThemeSettings,
                             darkTheme: themeOption.id,
-                          }));
+                          };
+                          setAutoThemeSettings(newSettings);
+                          await saveAutoThemeSettings(newSettings);
                         } else {
                           handleThemeSelect(themeOption.id);
                         }

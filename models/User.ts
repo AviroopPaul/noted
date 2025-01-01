@@ -16,8 +16,17 @@ const userSchema = new mongoose.Schema(
     image: String,
     defaultTheme: {
       type: String,
-      enum: ["light", "dark"],
-      default: "dark",
+    },
+    autoTheme: {
+      enabled: {
+        type: Boolean,
+      },
+      lightTheme: {
+        type: String,
+      },
+      darkTheme: {
+        type: String,
+      },
     },
     displayName: {
       type: String,
