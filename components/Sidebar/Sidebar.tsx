@@ -1,10 +1,18 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { createPage, selectPage, togglePageExpand } from "@/store/PagesSlice";
 import PageItem from "./PageItem";
-import { Plus, ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
+import {
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Filter,
+  ArrowUpDown,
+} from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
+import type { SortOption } from "@/types/page";
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -25,6 +33,10 @@ export default function Sidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>("recent");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleAddPage = () => {
     dispatch(
@@ -92,6 +104,71 @@ export default function Sidebar() {
     return Array.from(icons);
   };
 
+  const sortPages = (pages: Page[]) => {
+    switch (sortOption) {
+      case "alphabetical":
+        return [...pages].sort((a, b) => a.title.localeCompare(b.title));
+      case "icon":
+        return [...pages].sort((a, b) => {
+          if (!a.icon && !b.icon) return 0;
+          if (!a.icon) return 1;
+          if (!b.icon) return -1;
+          return a.icon.localeCompare(b.icon);
+        });
+      case "recent":
+      default:
+        return [...pages].sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+    }
+  };
+
+  useEffect(() => {
+    const loadSortPreference = async () => {
+      try {
+        const response = await fetch("/api/user/settings");
+        const data = await response.json();
+        if (data.sidebarSort) {
+          setSortOption(data.sidebarSort);
+        }
+      } catch (error) {
+        console.error("Failed to load sort preference:", error);
+      }
+    };
+    loadSortPreference();
+  }, []);
+
+  const handleSortChange = async (newSort: SortOption) => {
+    setSortOption(newSort);
+    setShowSortDropdown(false);
+    try {
+      await fetch("/api/user/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sidebarSort: newSort }),
+      });
+    } catch (error) {
+      console.error("Failed to save sort preference:", error);
+    }
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowSortDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div
       ref={sidebarRef}
@@ -111,6 +188,50 @@ export default function Sidebar() {
           <div className="flex items-center gap-1">
             {!isCollapsed && (
               <>
+                <div className="relative" ref={sortDropdownRef}>
+                  <button
+                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                    className="btn btn-ghost btn-sm btn-circle"
+                    title="Sort pages"
+                  >
+                    <ArrowUpDown
+                      size={18}
+                      className={`text-base-content ${
+                        sortOption !== "recent" ? "text-base-content" : ""
+                      }`}
+                    />
+                  </button>
+                  {showSortDropdown && (
+                    <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={() => handleSortChange("recent")}
+                          className={`block px-4 py-2 text-sm w-full text-left hover:bg-base-300 ${
+                            sortOption === "recent" ? "bg-base-300" : ""
+                          }`}
+                        >
+                          Sort by Recent
+                        </button>
+                        <button
+                          onClick={() => handleSortChange("alphabetical")}
+                          className={`block px-4 py-2 text-sm w-full text-left hover:bg-base-300 ${
+                            sortOption === "alphabetical" ? "bg-base-300" : ""
+                          }`}
+                        >
+                          Sort Alphabetically
+                        </button>
+                        <button
+                          onClick={() => handleSortChange("icon")}
+                          className={`block px-4 py-2 text-sm w-full text-left hover:bg-base-300 ${
+                            sortOption === "icon" ? "bg-base-300" : ""
+                          }`}
+                        >
+                          Sort by Icon
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="btn btn-ghost btn-sm btn-circle"
@@ -189,7 +310,7 @@ export default function Sidebar() {
       </div>
 
       <div className="overflow-y-auto flex-1">
-        {filterPages(pages).map((page) => (
+        {sortPages(filterPages(pages)).map((page) => (
           <div
             key={page._id}
             className="border-b border-base-300 last:border-b-0"

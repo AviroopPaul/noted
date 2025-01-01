@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    sidebarSort: {
+      type: String,
+      enum: ["alphabetical", "recent", "icon"],
+      default: "recent",
+    },
   },
   {
     timestamps: true,
