@@ -1,9 +1,17 @@
 import React from "react";
 import { Page } from "@/types";
-import { ChevronRight, ChevronDown, Trash2 } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Trash2,
+  MoreHorizontal,
+  FolderPlus,
+  FolderMinus,
+} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { deletePage } from "@/store/PagesSlice";
 import type { AppDispatch } from "@/store/store";
+import { useState } from "react";
 
 interface PageItemProps {
   page: Page;
@@ -12,6 +20,9 @@ interface PageItemProps {
   onSelect: (id: string) => void;
   onToggle: (id: string) => void;
   isCollapsed: boolean;
+  folders: Array<{ _id: string; name: string; pageIds: string[] }>;
+  onAddToFolder: (folderId: string, pageId: string) => void;
+  onRemoveFromFolder: (folderId: string, pageId: string) => void;
 }
 
 export default function PageItem({
@@ -21,9 +32,28 @@ export default function PageItem({
   onSelect,
   onToggle,
   isCollapsed,
+  folders,
+  onAddToFolder,
+  onRemoveFromFolder,
 }: PageItemProps) {
   const dispatch = useDispatch<AppDispatch>();
   const isSelected = selectedPageId === page._id;
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -33,7 +63,7 @@ export default function PageItem({
   };
 
   return (
-    <>
+    <div className="relative">
       <div
         className={`
           flex items-center cursor-pointer justify-between group
@@ -75,13 +105,74 @@ export default function PageItem({
         </div>
 
         {!isCollapsed && (
-          <button
-            onClick={handleDelete}
-            className="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100"
-            title="Delete page"
-          >
-            <Trash2 className="h-4 w-4 text-error" />
-          </button>
+          <div className="flex items-center gap-2 text-base-content">
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDropdown(!showDropdown);
+                }}
+                className="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+
+              {showDropdown && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 top-full mt-1 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50"
+                  style={{ minWidth: "200px" }}
+                >
+                  <div className="py-1">
+                    {folders?.length === 0 ? (
+                      <div className="px-4 py-2 text-sm text-base-content/70">
+                        No folders available
+                      </div>
+                    ) : (
+                      folders?.map((folder) => (
+                        <button
+                          key={folder._id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (folder.pageIds.includes(page._id)) {
+                              onRemoveFromFolder(folder._id, page._id);
+                            } else {
+                              onAddToFolder(folder._id, page._id);
+                            }
+                            setShowDropdown(false);
+                          }}
+                          className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300"
+                        >
+                          {folder.pageIds.includes(page._id) ? (
+                            <>
+                              <FolderMinus className="h-4 w-4 mr-2" />
+                              Remove from {folder.name}
+                            </>
+                          ) : (
+                            <>
+                              <FolderPlus className="h-4 w-4 mr-2" />
+                              Add to {folder.name}
+                            </>
+                          )}
+                        </button>
+                      ))
+                    )}
+                    <div className="border-t border-base-300 mt-1"></div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(e);
+                      }}
+                      className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300 text-error"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete page
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -96,8 +187,11 @@ export default function PageItem({
             onSelect={onSelect}
             onToggle={onToggle}
             isCollapsed={isCollapsed}
+            folders={folders}
+            onAddToFolder={onAddToFolder}
+            onRemoveFromFolder={onRemoveFromFolder}
           />
         ))}
-    </>
+    </div>
   );
 }

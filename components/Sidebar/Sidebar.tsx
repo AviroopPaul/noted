@@ -10,9 +10,26 @@ import {
   Search,
   Filter,
   ArrowUpDown,
+  Folder,
+  Trash2,
+  File,
+  Edit2,
 } from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import type { SortOption } from "@/types/page";
+import { Page } from "@/types/page";
+
+interface Folder {
+  _id: string;
+  name: string;
+  pageIds: string[];
+  isExpanded?: boolean;
+}
+
+interface NewFolder extends Omit<Folder, "_id"> {
+  _id?: string;
+  isEditing?: boolean;
+}
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -37,6 +54,15 @@ export default function Sidebar() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [folders, setFolders] = useState<(Folder | NewFolder)[]>([]);
+
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
 
   const handleAddPage = () => {
     dispatch(
@@ -169,6 +195,90 @@ export default function Sidebar() {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchFolders = async () => {
+      const response = await fetch("/api/folders");
+      const data = await response.json();
+      setFolders(data);
+    };
+    fetchFolders();
+  }, []);
+
+  const handleAddToFolder = async (folderId: string, pageId: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}/pages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pageId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add page to folder");
+      }
+
+      // Refresh folders
+      const foldersResponse = await fetch("/api/folders");
+      const data = await foldersResponse.json();
+      setFolders(data);
+    } catch (error) {
+      console.error("Error adding page to folder:", error);
+      // You might want to add a toast notification here
+    }
+  };
+
+  const handleRemoveFromFolder = async (folderId: string, pageId: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}/pages`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pageId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to remove page from folder");
+      }
+
+      // Refresh folders
+      const foldersResponse = await fetch("/api/folders");
+      const data = await foldersResponse.json();
+      setFolders(data);
+    } catch (error) {
+      console.error("Error removing page from folder:", error);
+      // You might want to add a toast notification here
+    }
+  };
+
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete folder");
+      }
+
+      // Refresh folders list
+      const foldersResponse = await fetch("/api/folders");
+      const data = await foldersResponse.json();
+      setFolders(data);
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+    }
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(folderId)) {
+        next.delete(folderId);
+      } else {
+        next.add(folderId);
+      }
+      return next;
+    });
+  };
+
   return (
     <div
       ref={sidebarRef}
@@ -203,7 +313,7 @@ export default function Sidebar() {
                   </button>
                   {showSortDropdown && (
                     <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50">
-                      <div className="py-1">
+                      <div className="py-1 text-base-content">
                         <button
                           onClick={() => handleSortChange("recent")}
                           className={`block px-4 py-2 text-sm w-full text-left hover:bg-base-300 ${
@@ -244,13 +354,47 @@ export default function Sidebar() {
                     }`}
                   />
                 </button>
-                <button
-                  onClick={handleAddPage}
-                  className="btn btn-ghost btn-sm btn-circle"
-                  title="New Page"
-                >
-                  <Plus size={20} className="text-base-content" />
-                </button>
+                <div className="relative" ref={addMenuRef}>
+                  <button
+                    onClick={() => setShowAddMenu(!showAddMenu)}
+                    className="btn btn-ghost btn-sm btn-circle"
+                    title="Add New"
+                  >
+                    <Plus size={20} className="text-base-content" />
+                  </button>
+                  {showAddMenu && (
+                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50 text-base-content">
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            handleAddPage();
+                            setShowAddMenu(false);
+                          }}
+                          className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300"
+                        >
+                          <File size={16} className="mr-2" />
+                          New Page
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Create a new folder with temporary ID and empty name
+                            const newFolder: NewFolder = {
+                              name: "",
+                              pageIds: [],
+                              isEditing: true,
+                            };
+                            setFolders([...folders, newFolder]);
+                            setShowAddMenu(false);
+                          }}
+                          className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300"
+                        >
+                          <Folder size={16} className="mr-2" />
+                          New Folder
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             <button
@@ -310,21 +454,223 @@ export default function Sidebar() {
       </div>
 
       <div className="overflow-y-auto flex-1">
-        {sortPages(filterPages(pages)).map((page) => (
-          <div
-            key={page._id}
-            className="border-b border-base-300 last:border-b-0"
-          >
-            <PageItem
-              page={page}
-              level={0}
-              selectedPageId={selectedPageId}
-              onSelect={(id) => handleSelectPage(id)}
-              onToggle={(id) => dispatch(togglePageExpand(id))}
-              isCollapsed={isCollapsed}
-            />
+        {!isCollapsed && folders.length > 0 && (
+          <div className="border-b border-base-300 text-base-content">
+            {folders.map((folder) => (
+              <div key={folder._id || "new"} className="group">
+                <div className="flex items-center px-4 py-2 hover:bg-base-300 justify-between">
+                  <div className="flex items-center flex-1">
+                    <button
+                      onClick={() => folder._id && toggleFolder(folder._id)}
+                      className="p-1 hover:bg-base-100 rounded"
+                    >
+                      <ChevronRight
+                        size={16}
+                        className={`text-base-content transition-transform ${
+                          expandedFolders.has(folder._id!) ? "rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+                    <Folder size={16} className="mr-2 text-base-content" />
+                    {folder.isEditing ? (
+                      <input
+                        type="text"
+                        value={folder.name}
+                        autoFocus
+                        className="input input-sm input-ghost w-full max-w-[200px] focus:outline-none p-0 text-base-content"
+                        onChange={(e) => {
+                          const updatedFolders = folders.map((f) =>
+                            f === folder ? { ...f, name: e.target.value } : f
+                          );
+                          setFolders(updatedFolders);
+                        }}
+                        onKeyDown={async (e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (!folder.name.trim()) return;
+
+                            try {
+                              if (folder._id) {
+                                // Update existing folder
+                                const response = await fetch(
+                                  `/api/folders/${folder._id}`,
+                                  {
+                                    method: "PATCH",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ name: folder.name }),
+                                  }
+                                );
+
+                                if (!response.ok)
+                                  throw new Error("Failed to update folder");
+                              } else {
+                                // Create new folder
+                                const response = await fetch("/api/folders", {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({ name: folder.name }),
+                                });
+
+                                if (!response.ok)
+                                  throw new Error("Failed to create folder");
+                              }
+
+                              // Refresh folders list
+                              const foldersResponse = await fetch(
+                                "/api/folders"
+                              );
+                              const data = await foldersResponse.json();
+                              setFolders(data);
+                            } catch (error) {
+                              console.error("Error saving folder:", error);
+                            }
+                          } else if (e.key === "Escape") {
+                            // Cancel editing
+                            const updatedFolders = folders.map((f) =>
+                              f === folder ? { ...f, isEditing: false } : f
+                            );
+                            setFolders(updatedFolders);
+                          }
+                        }}
+                        onBlur={async () => {
+                          if (!folder.name.trim()) {
+                            if (!folder._id) {
+                              // Remove empty new folder
+                              setFolders(folders.filter((f) => f !== folder));
+                            } else {
+                              // Revert name for existing folder
+                              const foldersResponse = await fetch(
+                                "/api/folders"
+                              );
+                              const data = await foldersResponse.json();
+                              setFolders(data);
+                            }
+                            return;
+                          }
+
+                          try {
+                            if (folder._id) {
+                              // Update existing folder
+                              const response = await fetch(
+                                `/api/folders/${folder._id}`,
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({ name: folder.name }),
+                                }
+                              );
+
+                              if (!response.ok)
+                                throw new Error("Failed to update folder");
+                            } else {
+                              // Create new folder
+                              const response = await fetch("/api/folders", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ name: folder.name }),
+                              });
+
+                              if (!response.ok)
+                                throw new Error("Failed to create folder");
+                            }
+
+                            // Refresh folders list
+                            const foldersResponse = await fetch("/api/folders");
+                            const data = await foldersResponse.json();
+                            setFolders(data);
+                          } catch (error) {
+                            console.error("Error saving folder:", error);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <span className="font-medium">{folder.name}</span>
+                        <span className="text-xs text-base-content/70 ml-2">
+                          ({folder.pageIds?.length || 0})
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {!folder.isEditing && (
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => {
+                          const updatedFolders = folders.map((f) =>
+                            f === folder ? { ...f, isEditing: true } : f
+                          );
+                          setFolders(updatedFolders);
+                        }}
+                        className="btn btn-ghost btn-xs btn-square"
+                        title="Edit Folder"
+                      >
+                        <Edit2 size={14} className="text-base-content" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteFolder(folder._id!)}
+                        className="btn btn-ghost btn-xs btn-square"
+                        title="Delete Folder"
+                      >
+                        <Trash2 size={14} className="text-error" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {expandedFolders.has(folder._id!) &&
+                  sortPages(filterPages(pages))
+                    .filter((page) => folder.pageIds.includes(page._id))
+                    .map((page) => (
+                      <div
+                        key={page._id}
+                        className="border-b border-base-300 last:border-b-0 ml-4"
+                      >
+                        <PageItem
+                          page={page}
+                          level={1}
+                          selectedPageId={selectedPageId}
+                          onSelect={(id) => handleSelectPage(id)}
+                          onToggle={(id) => dispatch(togglePageExpand(id))}
+                          isCollapsed={isCollapsed}
+                          folders={folders}
+                          onAddToFolder={handleAddToFolder}
+                          onRemoveFromFolder={handleRemoveFromFolder}
+                        />
+                      </div>
+                    ))}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+
+        {sortPages(filterPages(pages))
+          .filter(
+            (page) =>
+              !folders.some((folder) => folder.pageIds.includes(page._id))
+          )
+          .map((page) => (
+            <div
+              key={page._id}
+              className="border-b border-base-300 last:border-b-0"
+            >
+              <PageItem
+                page={page}
+                level={0}
+                selectedPageId={selectedPageId}
+                onSelect={(id) => handleSelectPage(id)}
+                onToggle={(id) => dispatch(togglePageExpand(id))}
+                isCollapsed={isCollapsed}
+                folders={folders}
+                onAddToFolder={handleAddToFolder}
+                onRemoveFromFolder={handleRemoveFromFolder}
+              />
+            </div>
+          ))}
       </div>
       <div
         className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors"
