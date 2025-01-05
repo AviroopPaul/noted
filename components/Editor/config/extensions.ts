@@ -11,6 +11,7 @@ import { Color } from "@tiptap/extension-color";
 import { createLowlight, all } from "lowlight";
 import { FontSize } from "./FontSize";
 import Highlight from "@tiptap/extension-highlight";
+import Link from "@tiptap/extension-link";
 
 const lowlight = createLowlight(all);
 
@@ -59,5 +60,11 @@ export const getExtensions = () => [
   FontSize,
   Highlight.configure({
     multicolor: false,
+  }),
+  Link.configure({
+    openOnClick: false,
+    HTMLAttributes: {
+      class: "text-primary hover:underline cursor-pointer",
+    },
   }),
 ];

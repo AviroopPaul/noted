@@ -20,6 +20,8 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
     text: string;
     language: string;
   } | null>(null);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
 
   const detectLanguage = (text: string) => {
     // Common language patterns
@@ -173,6 +175,21 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
             >
               Highlight
             </button>
+            <div className="w-px bg-base-300 mx-1" /> {/* Separator */}
+            <button
+              onClick={() => {
+                if (editor.isActive("link")) {
+                  editor.chain().focus().unsetLink().run();
+                } else {
+                  setShowLinkDialog(true);
+                }
+              }}
+              className={`p-1 rounded hover:bg-base-200 ${
+                editor.isActive("link") ? "bg-base-300" : ""
+              }`}
+            >
+              🔗
+            </button>
           </BubbleMenu>
         )}
         {isPasting && (
@@ -181,57 +198,96 @@ const RichTextEditor = ({ content, onChange, onBlur }: RichTextEditorProps) => {
           </div>
         )}
         <EditorContent editor={editor} className="text-base-content" />
-      </div>
-      {codeToInsert && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-base-100 p-4 rounded-lg w-[95vw] max-w-md">
-            <p className="mb-4">
-              This looks like code. How would you like to paste it?
-            </p>
-            <select
-              className="w-full mb-4 p-2 rounded border border-base-300"
-              value={codeToInsert.language}
-              onChange={(e) =>
-                setCodeToInsert({ ...codeToInsert, language: e.target.value })
-              }
-            >
-              <option value="plain">Plain text</option>
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              {/* Add more languages */}
-            </select>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button
-                className="btn btn-primary w-full sm:w-auto"
-                onClick={() => {
-                  editor
-                    ?.chain()
-                    .focus()
-                    .setCodeBlock({ language: codeToInsert.language })
-                    .insertContent(codeToInsert.text)
-                    .run();
-                  setCodeToInsert(null);
-                }}
-              >
-                Insert as Code
-              </button>
-              <button
-                className="btn btn-outline w-full sm:w-auto"
-                onClick={() => {
-                  editor
-                    ?.chain()
-                    .focus()
-                    .insertContent(codeToInsert.text)
-                    .run();
-                  setCodeToInsert(null);
-                }}
-              >
-                Insert as Text
-              </button>
+
+        {showLinkDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-base-100 p-4 rounded-lg w-[95vw] max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Add Link</h3>
+              <input
+                type="url"
+                placeholder="Enter URL"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="w-full mb-4 p-2 rounded border border-base-300"
+              />
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <button
+                  className="btn btn-primary w-full sm:w-auto"
+                  onClick={() => {
+                    if (linkUrl) {
+                      editor?.chain().focus().setLink({ href: linkUrl }).run();
+                    }
+                    setShowLinkDialog(false);
+                    setLinkUrl("");
+                  }}
+                >
+                  Add Link
+                </button>
+                <button
+                  className="btn btn-outline w-full sm:w-auto"
+                  onClick={() => {
+                    setShowLinkDialog(false);
+                    setLinkUrl("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {codeToInsert && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-base-100 p-4 rounded-lg w-[95vw] max-w-md">
+              <p className="mb-4">
+                This looks like code. How would you like to paste it?
+              </p>
+              <select
+                className="w-full mb-4 p-2 rounded border border-base-300"
+                value={codeToInsert.language}
+                onChange={(e) =>
+                  setCodeToInsert({ ...codeToInsert, language: e.target.value })
+                }
+              >
+                <option value="plain">Plain text</option>
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                {/* Add more languages */}
+              </select>
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <button
+                  className="btn btn-primary w-full sm:w-auto"
+                  onClick={() => {
+                    editor
+                      ?.chain()
+                      .focus()
+                      .setCodeBlock({ language: codeToInsert.language })
+                      .insertContent(codeToInsert.text)
+                      .run();
+                    setCodeToInsert(null);
+                  }}
+                >
+                  Insert as Code
+                </button>
+                <button
+                  className="btn btn-outline w-full sm:w-auto"
+                  onClick={() => {
+                    editor
+                      ?.chain()
+                      .focus()
+                      .insertContent(codeToInsert.text)
+                      .run();
+                    setCodeToInsert(null);
+                  }}
+                >
+                  Insert as Text
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
