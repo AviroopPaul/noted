@@ -43,6 +43,7 @@ export default function PageItem({
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const deleteConfirmRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,6 +52,12 @@ export default function PageItem({
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
+      }
+      if (
+        deleteConfirmRef.current &&
+        !deleteConfirmRef.current.contains(event.target as Node)
+      ) {
+        setShowDeleteConfirm(false);
       }
     }
 
@@ -172,7 +179,10 @@ export default function PageItem({
                       </button>
 
                       {showDeleteConfirm && (
-                        <div className="absolute right-0 bottom-full mb-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 p-3">
+                        <div
+                          ref={deleteConfirmRef}
+                          className="absolute right-0 top-full mt-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 p-3"
+                        >
                           <p className="text-sm mb-2">Are you sure?</p>
                           <div className="flex justify-end gap-2">
                             <button
