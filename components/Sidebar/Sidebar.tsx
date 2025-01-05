@@ -18,6 +18,7 @@ import {
 import LoadingSpinner from "../UI/LoadingSpinner";
 import type { SortOption } from "@/types/page";
 import { Page } from "@/types/page";
+import SkeletonLoader from "../UI/SkeletonLoader";
 
 interface Folder {
   _id: string;
@@ -63,6 +64,8 @@ export default function Sidebar() {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const handleAddPage = () => {
     dispatch(
@@ -197,9 +200,15 @@ export default function Sidebar() {
 
   useEffect(() => {
     const fetchFolders = async () => {
-      const response = await fetch("/api/folders");
-      const data = await response.json();
-      setFolders(data);
+      try {
+        const response = await fetch("/api/folders");
+        const data = await response.json();
+        setFolders(data);
+      } catch (error) {
+        console.error("Error fetching folders:", error);
+      } finally {
+        setIsInitialLoading(false);
+      }
     };
     fetchFolders();
   }, []);
@@ -454,223 +463,252 @@ export default function Sidebar() {
       </div>
 
       <div className="overflow-y-auto flex-1">
-        {!isCollapsed && folders.length > 0 && (
-          <div className="border-b border-base-300 text-base-content">
-            {folders.map((folder) => (
-              <div key={folder._id || "new"} className="group">
-                <div className="flex items-center px-4 py-2 hover:bg-base-300 justify-between">
-                  <div className="flex items-center flex-1">
-                    <button
-                      onClick={() => folder._id && toggleFolder(folder._id)}
-                      className="p-1 hover:bg-base-100 rounded"
-                    >
-                      <ChevronRight
-                        size={16}
-                        className={`text-base-content transition-transform ${
-                          expandedFolders.has(folder._id!) ? "rotate-90" : ""
-                        }`}
-                      />
-                    </button>
-                    <Folder size={16} className="mr-2 text-base-content" />
-                    {folder.isEditing ? (
-                      <input
-                        type="text"
-                        value={folder.name}
-                        autoFocus
-                        className="input input-sm input-ghost w-full max-w-[200px] focus:outline-none p-0 text-base-content"
-                        onChange={(e) => {
-                          const updatedFolders = folders.map((f) =>
-                            f === folder ? { ...f, name: e.target.value } : f
-                          );
-                          setFolders(updatedFolders);
-                        }}
-                        onKeyDown={async (e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            if (!folder.name.trim()) return;
+        {isInitialLoading ? (
+          !isCollapsed && <SkeletonLoader />
+        ) : (
+          <>
+            {!isCollapsed && folders.length > 0 && (
+              <div className="border-b border-base-300 text-base-content">
+                {folders.map((folder) => (
+                  <div key={folder._id || "new"} className="group">
+                    <div className="flex items-center px-4 py-2 hover:bg-base-300 justify-between">
+                      <div className="flex items-center flex-1">
+                        <button
+                          onClick={() => folder._id && toggleFolder(folder._id)}
+                          className="p-1 hover:bg-base-100 rounded"
+                        >
+                          <ChevronRight
+                            size={16}
+                            className={`text-base-content transition-transform ${
+                              expandedFolders.has(folder._id!)
+                                ? "rotate-90"
+                                : ""
+                            }`}
+                          />
+                        </button>
+                        <Folder size={16} className="mr-2 text-base-content" />
+                        {folder.isEditing ? (
+                          <input
+                            type="text"
+                            value={folder.name}
+                            autoFocus
+                            className="input input-sm input-ghost w-full max-w-[200px] focus:outline-none p-0 text-base-content"
+                            onChange={(e) => {
+                              const updatedFolders = folders.map((f) =>
+                                f === folder
+                                  ? { ...f, name: e.target.value }
+                                  : f
+                              );
+                              setFolders(updatedFolders);
+                            }}
+                            onKeyDown={async (e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                if (!folder.name.trim()) return;
 
-                            try {
-                              if (folder._id) {
-                                // Update existing folder
-                                const response = await fetch(
-                                  `/api/folders/${folder._id}`,
-                                  {
-                                    method: "PATCH",
+                                try {
+                                  if (folder._id) {
+                                    // Update existing folder
+                                    const response = await fetch(
+                                      `/api/folders/${folder._id}`,
+                                      {
+                                        method: "PATCH",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          name: folder.name,
+                                        }),
+                                      }
+                                    );
+
+                                    if (!response.ok)
+                                      throw new Error(
+                                        "Failed to update folder"
+                                      );
+                                  } else {
+                                    // Create new folder
+                                    const response = await fetch(
+                                      "/api/folders",
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          name: folder.name,
+                                        }),
+                                      }
+                                    );
+
+                                    if (!response.ok)
+                                      throw new Error(
+                                        "Failed to create folder"
+                                      );
+                                  }
+
+                                  // Refresh folders list
+                                  const foldersResponse = await fetch(
+                                    "/api/folders"
+                                  );
+                                  const data = await foldersResponse.json();
+                                  setFolders(data);
+                                } catch (error) {
+                                  console.error("Error saving folder:", error);
+                                }
+                              } else if (e.key === "Escape") {
+                                // Cancel editing
+                                const updatedFolders = folders.map((f) =>
+                                  f === folder ? { ...f, isEditing: false } : f
+                                );
+                                setFolders(updatedFolders);
+                              }
+                            }}
+                            onBlur={async () => {
+                              if (!folder.name.trim()) {
+                                if (!folder._id) {
+                                  // Remove empty new folder
+                                  setFolders(
+                                    folders.filter((f) => f !== folder)
+                                  );
+                                } else {
+                                  // Revert name for existing folder
+                                  const foldersResponse = await fetch(
+                                    "/api/folders"
+                                  );
+                                  const data = await foldersResponse.json();
+                                  setFolders(data);
+                                }
+                                return;
+                              }
+
+                              try {
+                                if (folder._id) {
+                                  // Update existing folder
+                                  const response = await fetch(
+                                    `/api/folders/${folder._id}`,
+                                    {
+                                      method: "PATCH",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({
+                                        name: folder.name,
+                                      }),
+                                    }
+                                  );
+
+                                  if (!response.ok)
+                                    throw new Error("Failed to update folder");
+                                } else {
+                                  // Create new folder
+                                  const response = await fetch("/api/folders", {
+                                    method: "POST",
                                     headers: {
                                       "Content-Type": "application/json",
                                     },
                                     body: JSON.stringify({ name: folder.name }),
-                                  }
-                                );
+                                  });
 
-                                if (!response.ok)
-                                  throw new Error("Failed to update folder");
-                              } else {
-                                // Create new folder
-                                const response = await fetch("/api/folders", {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({ name: folder.name }),
-                                });
-
-                                if (!response.ok)
-                                  throw new Error("Failed to create folder");
-                              }
-
-                              // Refresh folders list
-                              const foldersResponse = await fetch(
-                                "/api/folders"
-                              );
-                              const data = await foldersResponse.json();
-                              setFolders(data);
-                            } catch (error) {
-                              console.error("Error saving folder:", error);
-                            }
-                          } else if (e.key === "Escape") {
-                            // Cancel editing
-                            const updatedFolders = folders.map((f) =>
-                              f === folder ? { ...f, isEditing: false } : f
-                            );
-                            setFolders(updatedFolders);
-                          }
-                        }}
-                        onBlur={async () => {
-                          if (!folder.name.trim()) {
-                            if (!folder._id) {
-                              // Remove empty new folder
-                              setFolders(folders.filter((f) => f !== folder));
-                            } else {
-                              // Revert name for existing folder
-                              const foldersResponse = await fetch(
-                                "/api/folders"
-                              );
-                              const data = await foldersResponse.json();
-                              setFolders(data);
-                            }
-                            return;
-                          }
-
-                          try {
-                            if (folder._id) {
-                              // Update existing folder
-                              const response = await fetch(
-                                `/api/folders/${folder._id}`,
-                                {
-                                  method: "PATCH",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({ name: folder.name }),
+                                  if (!response.ok)
+                                    throw new Error("Failed to create folder");
                                 }
-                              );
 
-                              if (!response.ok)
-                                throw new Error("Failed to update folder");
-                            } else {
-                              // Create new folder
-                              const response = await fetch("/api/folders", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ name: folder.name }),
-                              });
-
-                              if (!response.ok)
-                                throw new Error("Failed to create folder");
-                            }
-
-                            // Refresh folders list
-                            const foldersResponse = await fetch("/api/folders");
-                            const data = await foldersResponse.json();
-                            setFolders(data);
-                          } catch (error) {
-                            console.error("Error saving folder:", error);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <>
-                        <span className="font-medium">{folder.name}</span>
-                        <span className="text-xs text-base-content/70 ml-2">
-                          ({folder.pageIds?.length || 0})
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  {!folder.isEditing && (
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => {
-                          const updatedFolders = folders.map((f) =>
-                            f === folder ? { ...f, isEditing: true } : f
-                          );
-                          setFolders(updatedFolders);
-                        }}
-                        className="btn btn-ghost btn-xs btn-square"
-                        title="Edit Folder"
-                      >
-                        <Edit2 size={14} className="text-base-content" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteFolder(folder._id!)}
-                        className="btn btn-ghost btn-xs btn-square"
-                        title="Delete Folder"
-                      >
-                        <Trash2 size={14} className="text-error" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {expandedFolders.has(folder._id!) &&
-                  sortPages(filterPages(pages))
-                    .filter((page) => folder.pageIds.includes(page._id))
-                    .map((page) => (
-                      <div
-                        key={page._id}
-                        className="border-b border-base-300 last:border-b-0 ml-4"
-                      >
-                        <PageItem
-                          page={page}
-                          level={1}
-                          selectedPageId={selectedPageId}
-                          onSelect={(id) => handleSelectPage(id)}
-                          onToggle={(id) => dispatch(togglePageExpand(id))}
-                          isCollapsed={isCollapsed}
-                          folders={folders}
-                          onAddToFolder={handleAddToFolder}
-                          onRemoveFromFolder={handleRemoveFromFolder}
-                        />
+                                // Refresh folders list
+                                const foldersResponse = await fetch(
+                                  "/api/folders"
+                                );
+                                const data = await foldersResponse.json();
+                                setFolders(data);
+                              } catch (error) {
+                                console.error("Error saving folder:", error);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <span className="font-medium">{folder.name}</span>
+                            <span className="text-xs text-base-content/70 ml-2">
+                              ({folder.pageIds?.length || 0})
+                            </span>
+                          </>
+                        )}
                       </div>
-                    ))}
+                      {!folder.isEditing && (
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              const updatedFolders = folders.map((f) =>
+                                f === folder ? { ...f, isEditing: true } : f
+                              );
+                              setFolders(updatedFolders);
+                            }}
+                            className="btn btn-ghost btn-xs btn-square"
+                            title="Edit Folder"
+                          >
+                            <Edit2 size={14} className="text-base-content" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteFolder(folder._id!)}
+                            className="btn btn-ghost btn-xs btn-square"
+                            title="Delete Folder"
+                          >
+                            <Trash2 size={14} className="text-error" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {expandedFolders.has(folder._id!) &&
+                      sortPages(filterPages(pages))
+                        .filter((page) => folder.pageIds.includes(page._id))
+                        .map((page) => (
+                          <div
+                            key={page._id}
+                            className="border-b border-base-300 last:border-b-0 ml-4"
+                          >
+                            <PageItem
+                              page={page}
+                              level={1}
+                              selectedPageId={selectedPageId}
+                              onSelect={(id) => handleSelectPage(id)}
+                              onToggle={(id) => dispatch(togglePageExpand(id))}
+                              isCollapsed={isCollapsed}
+                              folders={folders}
+                              onAddToFolder={handleAddToFolder}
+                              onRemoveFromFolder={handleRemoveFromFolder}
+                            />
+                          </div>
+                        ))}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {sortPages(filterPages(pages))
-          .filter(
-            (page) =>
-              !folders.some((folder) => folder.pageIds.includes(page._id))
-          )
-          .map((page) => (
-            <div
-              key={page._id}
-              className="border-b border-base-300 last:border-b-0"
-            >
-              <PageItem
-                page={page}
-                level={0}
-                selectedPageId={selectedPageId}
-                onSelect={(id) => handleSelectPage(id)}
-                onToggle={(id) => dispatch(togglePageExpand(id))}
-                isCollapsed={isCollapsed}
-                folders={folders}
-                onAddToFolder={handleAddToFolder}
-                onRemoveFromFolder={handleRemoveFromFolder}
-              />
-            </div>
-          ))}
+            {sortPages(filterPages(pages))
+              .filter(
+                (page) =>
+                  !folders.some((folder) => folder.pageIds.includes(page._id))
+              )
+              .map((page) => (
+                <div
+                  key={page._id}
+                  className="border-b border-base-300 last:border-b-0"
+                >
+                  <PageItem
+                    page={page}
+                    level={0}
+                    selectedPageId={selectedPageId}
+                    onSelect={(id) => handleSelectPage(id)}
+                    onToggle={(id) => dispatch(togglePageExpand(id))}
+                    isCollapsed={isCollapsed}
+                    folders={folders}
+                    onAddToFolder={handleAddToFolder}
+                    onRemoveFromFolder={handleRemoveFromFolder}
+                  />
+                </div>
+              ))}
+          </>
+        )}
       </div>
       <div
         className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors"
