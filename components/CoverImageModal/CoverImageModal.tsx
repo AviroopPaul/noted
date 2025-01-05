@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Upload } from "lucide-react";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
@@ -6,6 +6,7 @@ interface CoverImageModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImageSelect: (imageUrl: string) => void;
+  onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 }
 
 const defaultCovers = [
@@ -22,8 +23,43 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
   isOpen,
   onClose,
   onImageSelect,
+  onFileUpload,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [recentImages, setRecentImages] = useState<string[]>([]);
+  const [isLoadingRecent, setIsLoadingRecent] = useState(false);
+  const [recentImagesError, setRecentImagesError] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchRecentImages = async () => {
+      if (isOpen) {
+        try {
+          setIsLoadingRecent(true);
+          setRecentImagesError(null);
+          const response = await fetch("/api/images/recent");
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to fetch recent images");
+          }
+
+          console.log("Received images:", data.images); // Debug log
+          setRecentImages(data.images.slice(0, 5));
+        } catch (error: unknown) {
+          console.error("Error fetching recent images:", error);
+          setRecentImagesError(
+            error instanceof Error ? error.message : "An unknown error occurred"
+          );
+        } finally {
+          setIsLoadingRecent(false);
+        }
+      }
+    };
+
+    fetchRecentImages();
+  }, [isOpen]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +106,7 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto">
+        <div className="p-4 overflow-y-auto space-y-6">
           {/* Upload section */}
           <div className="mb-6">
             <h4 className="text-sm font-medium mb-2">Upload image</h4>
@@ -104,6 +140,41 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
                 />
               </div>
             </label>
+          </div>
+
+          {/* Recently used images section */}
+          <div>
+            <h4 className="text-sm font-medium mb-2">Recently used</h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {isLoadingRecent ? (
+                <div className="col-span-full flex justify-center py-4">
+                  <LoadingSpinner size="medium" />
+                </div>
+              ) : recentImagesError ? (
+                <div className="col-span-full text-center text-error py-4">
+                  {recentImagesError}
+                </div>
+              ) : recentImages.length > 0 ? (
+                recentImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => onImageSelect(image)}
+                    className="relative aspect-video rounded-lg overflow-hidden hover:ring-2 hover:ring-primary transition-all"
+                    disabled={isUploading}
+                  >
+                    <img
+                      src={image}
+                      alt={`Recent cover ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-base-content/70 py-4">
+                  No recent images found
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Default covers section */}

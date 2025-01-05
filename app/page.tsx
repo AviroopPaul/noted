@@ -15,7 +15,6 @@ import dynamic from "next/dynamic";
 import { AppDispatch } from "@/store/store";
 import Footer from "@/components/Footer/Footer";
 import CoverImageModal from "@/components/CoverImageModal/CoverImageModal";
-import { debounce } from "lodash";
 import MobileSidebar from "@/components/Mobile/MobileSidebar";
 
 const RichTextEditor = dynamic(
@@ -44,6 +43,7 @@ export default function Home() {
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [showCoverModal, setShowCoverModal] = useState(false);
   const [isExpandedCover, setIsExpandedCover] = useState(false);
+  const [isCoverLoading, setIsCoverLoading] = useState(false);
 
   useEffect(() => {
     // Clear content when switching pages
@@ -105,6 +105,7 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (file && selectedPageId) {
       try {
+        setIsCoverLoading(true);
         const formData = new FormData();
         formData.append("file", file);
 
@@ -129,7 +130,8 @@ export default function Home() {
         );
       } catch (error) {
         console.error("Error uploading image:", error);
-        // You might want to add some error handling UI here
+      } finally {
+        setIsCoverLoading(false);
       }
     }
   };
@@ -190,6 +192,11 @@ export default function Home() {
                         alt="Cover"
                         className="w-full h-full object-cover"
                       />
+                      {isCoverLoading && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <div className="loading loading-spinner loading-lg text-primary"></div>
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all">
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
                           <button
@@ -277,6 +284,8 @@ export default function Home() {
                               ? "dark"
                               : "light"
                           }
+                          as
+                          const
                         />
                       </div>
                     )}
