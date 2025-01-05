@@ -7,6 +7,8 @@ import {
   MoreHorizontal,
   FolderPlus,
   FolderMinus,
+  Check,
+  X,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { deletePage } from "@/store/PagesSlice";
@@ -40,6 +42,7 @@ export default function PageItem({
   const isSelected = selectedPageId === page._id;
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -57,9 +60,7 @@ export default function PageItem({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this page?")) {
-      dispatch(deletePage(page._id));
-    }
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -158,16 +159,45 @@ export default function PageItem({
                       ))
                     )}
                     <div className="border-t border-base-300 mt-1"></div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(e);
-                      }}
-                      className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300 text-error"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete page
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(e);
+                        }}
+                        className="flex items-center px-4 py-2 text-sm w-full text-left hover:bg-base-300 text-error"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete page
+                      </button>
+
+                      {showDeleteConfirm && (
+                        <div className="absolute right-0 bottom-full mb-2 w-48 rounded-md shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 p-3">
+                          <p className="text-sm mb-2">Are you sure?</p>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowDeleteConfirm(false);
+                              }}
+                              className="btn btn-sm btn-ghost btn-square"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                dispatch(deletePage(page._id));
+                                setShowDeleteConfirm(false);
+                              }}
+                              className="btn btn-sm btn-error btn-square"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
