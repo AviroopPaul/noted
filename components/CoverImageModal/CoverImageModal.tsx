@@ -95,8 +95,8 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-base-100 rounded-lg w-[90%] max-w-3xl max-h-[80vh] overflow-hidden">
-        <div className="p-4 border-b border-base-300 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Choose cover image</h3>
+        <div className="p-4 border-b border-base-300 flex justify-between items-center text-base-content">
+          <h3 className="text-lg font-semibold ">Choose cover image</h3>
           <button
             onClick={onClose}
             className="btn btn-ghost btn-sm btn-circle"
@@ -108,7 +108,7 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
 
         <div className="p-4 overflow-y-auto space-y-6">
           {/* Upload section */}
-          <div className="mb-6">
+          <div className="mb-6 text-base-content">
             <h4 className="text-sm font-medium mb-2">Upload image</h4>
             <label
               className={`flex items-center justify-center w-full h-32 border-2 border-dashed border-base-300 rounded-lg cursor-pointer hover:border-primary transition-colors ${
@@ -144,7 +144,7 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
 
           {/* Recently used images section */}
           <div>
-            <h4 className="text-sm font-medium mb-2">Recently used</h4>
+            <h4 className="text-sm font-medium mb-2 text-base-content">Recently used</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {isLoadingRecent ? (
                 <div className="col-span-full flex justify-center py-4">
@@ -179,7 +179,7 @@ const CoverImageModal: React.FC<CoverImageModalProps> = ({
 
           {/* Default covers section */}
           <div>
-            <h4 className="text-sm font-medium mb-2">Default covers</h4>
+            <h4 className="text-sm font-medium mb-2 text-base-content">Default covers</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {defaultCovers.map((cover, index) => (
                 <button
