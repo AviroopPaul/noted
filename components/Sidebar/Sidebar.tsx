@@ -288,6 +288,31 @@ export default function Sidebar() {
     });
   };
 
+  const handleAddPageToFolder = async (folderId: string) => {
+    // First create the page
+    const action = await dispatch(
+      createPage({
+        title: "",
+        content: "",
+        isExpanded: false,
+      })
+    );
+
+    // Get the new page ID from the action
+    const newPageId = action.payload._id;
+
+    // Add the page to the folder
+    if (newPageId) {
+      await handleAddToFolder(folderId, newPageId);
+      // Expand the folder
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        next.add(folderId);
+        return next;
+      });
+    }
+  };
+
   return (
     <div
       ref={sidebarRef}
@@ -636,6 +661,16 @@ export default function Sidebar() {
                       </div>
                       {!folder.isEditing && (
                         <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              folder._id && handleAddPageToFolder(folder._id);
+                            }}
+                            className="btn btn-ghost btn-xs btn-square"
+                            title="Add page to folder"
+                          >
+                            <Plus size={14} className="text-base-content" />
+                          </button>
                           <button
                             onClick={() => {
                               const updatedFolders = folders.map((f) =>
