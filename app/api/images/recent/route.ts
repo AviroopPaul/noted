@@ -1,33 +1,57 @@
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import Page from "@/models/Page";
+import connectDB from "@/lib/mongodb";
 
 export async function GET() {
   try {
-    console.log("Fetching recent images...");
-    const result = await cloudinary.search
-      .expression("folder:note-app")
-      .sort_by("created_at", "desc")
-      .max_results(5)
-      .execute();
+    // Get the current user's session
+    const session = await getServerSession(authOptions);
 
-    console.log("Search result:", result);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const images = result.resources.map(
-      (resource: { secure_url: string }) => resource.secure_url
-    );
+    // Connect to database
+    await connectDB();
 
-    console.log("Processed images:", images);
+    // Fetch distinct cover images from user's pages
+    const recentImages = await Page.aggregate([
+      // Match documents for this user with cover images
+      {
+        $match: {
+          userId: session.user.id,
+          cover: { $exists: true, $ne: null },
+        },
+      },
+      // Group by cover URL to get unique covers
+      {
+        $group: {
+          _id: "$cover",
+          lastUpdated: { $max: "$updatedAt" }, // Keep track of most recent usage
+        },
+      },
+      // Sort by most recently used
+      {
+        $sort: { lastUpdated: -1 },
+      },
+      // Project to get just the cover URL
+      {
+        $project: {
+          _id: 0,
+          cover: "$_id",
+        },
+      },
+    ]);
+
+    const images = recentImages.map((item) => item.cover);
+
     return NextResponse.json({ images });
   } catch (error) {
     console.error("Error fetching recent images:", error);
     return NextResponse.json(
-      { error: "Failed to fetch recent images", details: error.message },
+      { error: "Failed to fetch recent images" },
       { status: 500 }
     );
   }
